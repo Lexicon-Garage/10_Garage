@@ -1,8 +1,10 @@
 
+using Garage.Web.Data;
+using Garage.Web.Helper;
+using Garage.Web.Models;
+using Garage.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Garage.Web.Models;
-using Garage.Web.Data;
 
 public class ParkedVehiclesController : Controller
 {
@@ -68,11 +70,27 @@ public class ParkedVehiclesController : Controller
         }
 
         var parkedvehicle = await _context.ParkedVehicles.FindAsync(id);
+        
         if (parkedvehicle == null)
         {
             return NotFound();
         }
-        return View(parkedvehicle);
+
+        var parkedVehicleEditViewModel = new ParkedVehicleEditViewModel
+        {
+            Id = parkedvehicle.Id,
+            RegistrationNumber = parkedvehicle.RegistrationNumber,
+            VehicleType = parkedvehicle.VehicleType,
+            Color = parkedvehicle.Color,
+            NumberOfWheels = parkedvehicle.NumberOfWheels,
+            Model = parkedvehicle.Model,
+            BrandType = parkedvehicle.BrandType,
+            ArrivedTime = parkedvehicle.ArrivedTime,
+            BrandTypes= EnumHelper.ToSelectList<BrandType>(),
+            VehicleTypes=EnumHelper.ToSelectList<VehicleType>()
+        };
+
+        return View(parkedVehicleEditViewModel);
     }
 
     // POST: PARKEDVEHICLES/Edit/5
@@ -80,34 +98,34 @@ public class ParkedVehiclesController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int? id, [Bind("Id,RegistrationNumber,VehicleType,Color,NumberOfWheels,Model,BrandType,ArrivedTime")] ParkedVehicle parkedvehicle)
+    public async Task<IActionResult> Edit(int? id, [Bind("Id,RegistrationNumber,VehicleType,Color,NumberOfWheels,Model,BrandType,ArrivedTime")] ParkedVehicleEditViewModel parkedViewvehicle)
     {
-        if (id != parkedvehicle.Id)
-        {
+        if (!ModelState.IsValid)
+            return View(parkedViewvehicle);
+
+        var vehicle = _context.ParkedVehicles.Find(parkedViewvehicle.Id);
+        if (vehicle == null)
             return NotFound();
+
+        bool exists = _context.ParkedVehicles.Any(v =>
+            v.RegistrationNumber == parkedViewvehicle.RegistrationNumber && v.Id != parkedViewvehicle.Id);
+
+        if (exists)
+        {
+            ModelState.AddModelError("RegistrationNumber", "Already exists");
+            return View(parkedViewvehicle);
         }
 
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                _context.Update(parkedvehicle);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ParkedVehicleExists(parkedvehicle.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return RedirectToAction(nameof(Index));
-        }
-        return View(parkedvehicle);
+        vehicle.RegistrationNumber = parkedViewvehicle.RegistrationNumber;
+        vehicle.VehicleType = parkedViewvehicle.VehicleType;
+        vehicle.Color = parkedViewvehicle.Color;
+        vehicle.NumberOfWheels = parkedViewvehicle.NumberOfWheels;
+        vehicle.Model = parkedViewvehicle.Model;
+        vehicle.BrandType = parkedViewvehicle.BrandType;
+
+        _context.SaveChanges();
+
+        return RedirectToAction(nameof(Index));
     }
 
     // GET: PARKEDVEHICLES/Delete/5
