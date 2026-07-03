@@ -6,17 +6,26 @@ namespace Garage.Web.Models
     public class ParkedVehicle
     {
         public int Id { get; set; }
-        [Range(5, 60)]
+
+        [Required]
+        [StringLength(60, MinimumLength = 5)]
         public required string RegistrationNumber { get; set; }
+
+        [EnumDataType(typeof(VehicleType))]
         public required VehicleType VehicleType { get; set; }
-       
-        [Range(1, 20)]
+
+        [Required]
+        [StringLength(20, MinimumLength = 2)]
         public string? Color { get; set; }
+
         [Range(1, 16)]
         public required int NumberOfWheels { get; set; }
-        [Range(1, 50)]
+
+        [Required]
+        [StringLength(50, MinimumLength = 1)]
         public string? Model { get; set; }
-        [Range(1, 50)]
+
+        [EnumDataType(typeof(BrandType))]
         public required BrandType BrandType { get; set; }
 
         [DataType(DataType.DateTime)]
