@@ -1,3 +1,6 @@
+using Garage.Web.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace Garage.Web
 {
 	public class Program
@@ -8,9 +11,12 @@ namespace Garage.Web
 
 			// Add services to the container.
 			builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<AppDbConext>(options =>
+     options.UseSqlServer(
+         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-			var app = builder.Build();
-
+            var app = builder.Build();
+	
 			// Configure the HTTP request pipeline.
 			if (!app.Environment.IsDevelopment())
 			{
@@ -27,7 +33,7 @@ namespace Garage.Web
 			app.MapStaticAssets();
 			app.MapControllerRoute(
 				name: "default",
-				pattern: "{controller=Home}/{action=Index}/{id?}")
+				pattern: "{controller=ParkedVehicles}/{action=Index}/{id?}")
 				.WithStaticAssets();
 
 			app.Run();
