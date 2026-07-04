@@ -93,7 +93,7 @@ public class ParkedVehiclesController : Controller
         return View(parkedVehicleEditViewModel);
     }
 
-    // POST: PARKEDVEHICLES/Edit/5
+    // POST: PARKEDVEHICLES/CheckOut/5
     // To protect from overposting attacks, enable the specific properties you want to bind to.
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
@@ -128,8 +128,9 @@ public class ParkedVehiclesController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // GET: PARKEDVEHICLES/Delete/5
-    public async Task<IActionResult> Delete(int? id)
+    // GET: PARKEDVEHICLES/CheckOut/5
+    [HttpGet]
+    public async Task<IActionResult> CheckOut(int? id)
     {
         if (id == null)
         {
@@ -146,23 +147,46 @@ public class ParkedVehiclesController : Controller
         return View(parkedvehicle);
     }
 
-    // POST: PARKEDVEHICLES/Delete/5
-    [HttpPost, ActionName("Delete")]
+    // POST: PARKEDVEHICLES/CheckOut/5
+    [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int? id)
+    public async Task<IActionResult> CheckOut(int id)
     {
-        var parkedvehicle = await _context.ParkedVehicles.FindAsync(id);
-        if (parkedvehicle != null)
-        {
-            _context.ParkedVehicles.Remove(parkedvehicle);
-        }
+        var vehicle = await _context.ParkedVehicles.FindAsync(id);
 
+        if (vehicle == null)
+            return NotFound();
+
+        var checkOutTime = DateTime.Now;
+        var parkingTime = checkOutTime - vehicle.ArrivedTime;
+
+        decimal price = CalculatePrice(parkingTime);
+
+        var receipt = new ReceiptViewModel
+        {
+            RegistrationNumber = vehicle.RegistrationNumber,
+            VehicleType = vehicle.VehicleType,
+            CheckInTime = vehicle.ArrivedTime,
+            CheckOutTime = checkOutTime,
+            ParkingDuration = parkingTime,
+            Price = price
+        };
+
+        _context.ParkedVehicles.Remove(vehicle);
         await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
+
+        return View("Receipt", receipt);
     }
 
     private bool ParkedVehicleExists(int? id)
     {
         return _context.ParkedVehicles.Any(e => e.Id == id);
+    }
+
+    private decimal CalculatePrice(TimeSpan parkingTime)
+    {
+        decimal hourlyRate = 5.0m;
+        int hours = (int)Math.Ceiling(parkingTime.TotalHours);
+        return hours * hourlyRate;
     }
 }
