@@ -5,6 +5,7 @@ using Garage.Web.Models;
 using Garage.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 public class ParkedVehiclesController : Controller
 {
@@ -168,6 +169,8 @@ public class ParkedVehiclesController : Controller
         _context.ParkedVehicles.Remove(vehicle);
         await _context.SaveChangesAsync();
 
-        return View("Receipt", receipt);
+        TempData["Receipt"] = JsonSerializer.Serialize(receipt);
+
+        return RedirectToAction("Index", "Receipts");
     }
 }
