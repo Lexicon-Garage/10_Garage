@@ -157,36 +157,17 @@ public class ParkedVehiclesController : Controller
         if (vehicle == null)
             return NotFound();
 
-        var checkOutTime = DateTime.Now;
-        var parkingTime = checkOutTime - vehicle.ArrivedTime;
-
-        decimal price = CalculatePrice(parkingTime);
-
         var receipt = new ReceiptViewModel
         {
             RegistrationNumber = vehicle.RegistrationNumber,
             VehicleType = vehicle.VehicleType,
             CheckInTime = vehicle.ArrivedTime,
-            CheckOutTime = checkOutTime,
-            ParkingDuration = parkingTime,
-            Price = price
+            CheckOutTime = DateTime.Now,
         };
 
         _context.ParkedVehicles.Remove(vehicle);
         await _context.SaveChangesAsync();
 
         return View("Receipt", receipt);
-    }
-
-    private bool ParkedVehicleExists(int? id)
-    {
-        return _context.ParkedVehicles.Any(e => e.Id == id);
-    }
-
-    private decimal CalculatePrice(TimeSpan parkingTime)
-    {
-        decimal hourlyRate = 5.0m;
-        int hours = (int)Math.Ceiling(parkingTime.TotalHours);
-        return hours * hourlyRate;
     }
 }
