@@ -1,0 +1,27 @@
+﻿@using Garage.Web.ViewModels
+@model ReceiptViewModel
+
+<h2>Receipt</h2>
+
+<dl class="row">
+    <dt class="col-sm-3">Registration Number</dt>
+    <dd class="col-sm-9">@Model.RegistrationNumber</dd>
+
+    <dt class="col-sm-3">Vehicle Type</dt>
+    <dd class="col-sm-9">@Model.VehicleType</dd>
+
+    <dt class="col-sm-3">Check In</dt>
+    <dd class="col-sm-9">@Model.CheckInTime</dd>
+
+    <dt class="col-sm-3">Check Out</dt>
+    <dd class="col-sm-9">@Model.CheckOutTime</dd>
+
+    <dt class="col-sm-3">Parking Duration</dt>
+    <dd class="col-sm-9">@Model.ParkingDuration</dd>
+
+    <dt class="col-sm-3">Price</dt>
+    <dd class="col-sm-9">@Model.Price.ToString("C")</dd>
+</dl>
+<a class="btn btn-secondary" asp-controller="Receipt" asp-action="ShowPDF">
+    Show Receipt as PDF
+</a>
