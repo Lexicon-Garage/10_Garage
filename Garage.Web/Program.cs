@@ -1,4 +1,6 @@
 using Garage.Web.Data;
+using Garage.Web.Services;
+using Garage.Web.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
 
@@ -17,7 +19,7 @@ namespace Garage.Web
             builder.Services.AddDbContext<AppDbConext>(options =>
             options.UseSqlServer(
             builder.Configuration.GetConnectionString("DefaultConnection")));
-
+			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
             var app = builder.Build();
 	
 			// Configure the HTTP request pipeline.
