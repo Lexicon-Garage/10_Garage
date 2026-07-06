@@ -35,7 +35,7 @@ namespace Garage.Web.Models
         public required BrandType BrandType { get; set; }
             
         [DataType(DataType.DateTime)]
-        [Display(Name = "Arrived Time")]
+        [Display(Name = "Arrived at")]
         public required DateTime ArrivedTime { get; init; }
     }
 }
