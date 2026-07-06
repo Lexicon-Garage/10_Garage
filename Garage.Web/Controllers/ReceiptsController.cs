@@ -1,15 +1,33 @@
-﻿using Garage.Web.ViewModels;
+﻿using Garage.Web.Services;
+using Garage.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace Garage.Web.Controllers
 {
     public class ReceiptsController : Controller
     {
+        private readonly IFileHandler<Stream, ReceiptViewModel> _iFileHandler;
+        public ReceiptsController(IFileHandler <Stream, ReceiptViewModel> IFileHandler)
+        {
+            _iFileHandler = IFileHandler;
+        }
         public IActionResult Index()
         {
-            var json = TempData["Receipt"] as string;
+            var json = TempData.Peek("Receipt") as string;
+
+            if (json == null)
+            {
+                return RedirectToAction("Index", "ParkedVehicles");
+            }
+
+            var receiptViewModel = JsonSerializer.Deserialize<ReceiptViewModel>(json);
+
+            return View(receiptViewModel);
+        }
+        public async Task<IActionResult> ShowPDF()
+        {
+            var json = TempData.Peek("Receipt") as string;
 
             if (json == null)
             {
@@ -18,12 +36,13 @@ namespace Garage.Web.Controllers
 
             var receipt = JsonSerializer.Deserialize<ReceiptViewModel>(json);
 
-            return View(receipt);
-        }
-        public async Task<IActionResult> ShowPDF()
-        {
-            // I have a custom implementation for generating PDF from the receipt view, but I will leave it empty for now.
-            return View("");
+            var stream = new MemoryStream();
+
+            await _iFileHandler.WriteAsync(stream, receipt!);
+
+            stream.Position = 0;
+
+            return File(stream, "application/pdf");
         }
     }
 }
