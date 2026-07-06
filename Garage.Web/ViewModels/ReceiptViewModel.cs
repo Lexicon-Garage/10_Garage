@@ -10,8 +10,8 @@ namespace Garage.Web.ViewModels
 
         public DateTime CheckInTime { get; set; }
         public DateTime CheckOutTime { get; set; }
-
-        public TimeSpan ParkingDuration  => CheckOutTime - CheckInTime;
-        public decimal Price => (int)Math.Ceiling(ParkingDuration.TotalHours) * HourlyRate;
+        private TimeSpan ParkingDuration  => CheckOutTime - CheckInTime;
+        public string ParkingDurationFormatted => ParkingDuration.ToString(@"hh\:mm\:ss");
+        public decimal Price => Math.Ceiling((decimal)ParkingDuration.TotalHours) * HourlyRate;
     }
 }

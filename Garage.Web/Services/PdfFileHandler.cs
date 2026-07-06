@@ -50,7 +50,7 @@ namespace Garage.Web.Services
                         column.Item().Text($"Check-out Time: {invoice.CheckOutTime:yyyy-MM-dd HH:mm}")
                             .FontSize(12);
 
-                        column.Item().Text($"Parking Duration: {invoice.ParkingDuration}")
+                        column.Item().Text($"Parking Duration: {invoice.ParkingDurationFormatted}")
                             .FontSize(12);
 
                         column.Item().PaddingTop(10).LineHorizontal(1);
