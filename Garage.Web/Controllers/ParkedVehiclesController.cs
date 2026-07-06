@@ -17,10 +17,18 @@ public class ParkedVehiclesController : Controller
     }
 
     // GET: PARKEDVEHICLES
-    public async Task<IActionResult> Index()    
+    public async Task<IActionResult> Index(string? searchString)    
     {
-        
-    var vehicles = await _context.ParkedVehicles
+
+    var query = _context.ParkedVehicles.AsQueryable();
+
+    if (!string.IsNullOrEmpty(searchString))
+    {
+        var term = searchString.Trim();
+        query = query.Where(v => v.RegistrationNumber.Contains(term));
+    }
+
+    var vehicles = await query
         .Select(v => new ParkedVehicleOverviewViewModel
         {
             Id = v.Id,
@@ -29,11 +37,10 @@ public class ParkedVehiclesController : Controller
             ArrivedTime = v.ArrivedTime
         })
         .ToListAsync();
-
+         ViewData["SearchString"] = searchString;
+         
     return View(vehicles);
-
     }
-
     // GET: PARKEDVEHICLES/Details/5
     public async Task<IActionResult> Details(int? id)
     {
