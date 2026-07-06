@@ -19,7 +19,19 @@ public class ParkedVehiclesController : Controller
     // GET: PARKEDVEHICLES
     public async Task<IActionResult> Index()    
     {
-        return View(await _context.ParkedVehicles.ToListAsync());
+        
+    var vehicles = await _context.ParkedVehicles
+        .Select(v => new ParkedVehicleOverviewViewModel
+        {
+            Id = v.Id,
+            VehicleType = v.VehicleType,
+            RegistrationNumber = v.RegistrationNumber,
+            ArrivedTime = v.ArrivedTime
+        })
+        .ToListAsync();
+
+    return View(vehicles);
+
     }
 
     // GET: PARKEDVEHICLES/Details/5

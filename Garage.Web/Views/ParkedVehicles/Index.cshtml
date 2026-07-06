@@ -1,13 +1,13 @@
-@model IEnumerable<Garage.Web.Models.ParkedVehicle>
+@model IEnumerable<Garage.Web.ViewModels.ParkedVehicleOverviewViewModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Garage overview";
 }
 
-<h1>Index</h1>
+<h1>Parked vehicles</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Park a vehicle</a>
 </p>
 <table class="table">
     <thead>
