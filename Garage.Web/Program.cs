@@ -1,5 +1,8 @@
 using Garage.Web.Data;
+using Garage.Web.Services;
+using Garage.Web.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure;
 
 namespace Garage.Web
 {
@@ -7,14 +10,16 @@ namespace Garage.Web
 	{
 		public static void Main(string[] args)
 		{
-			var builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder(args);
 
-			// Add services to the container.
-			builder.Services.AddControllersWithViews();
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            // Add services to the container.
+            builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<AppDbConext>(options =>
-     options.UseSqlServer(
-         builder.Configuration.GetConnectionString("DefaultConnection")));
-
+            options.UseSqlServer(
+            builder.Configuration.GetConnectionString("DefaultConnection")));
+			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
             var app = builder.Build();
 	
 			// Configure the HTTP request pipeline.
