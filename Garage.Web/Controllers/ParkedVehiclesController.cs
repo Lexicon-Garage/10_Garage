@@ -65,23 +65,27 @@ public class ParkedVehiclesController : Controller
 		return View();
     }
 
-    // POST: PARKEDVEHICLES/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
+	private void NormalizeInput(CreateParkVehicleViewModel viewModel)
+	{
+		if (viewModel.RegistrationNumber != null)
+			viewModel.RegistrationNumber = viewModel.RegistrationNumber.Trim().ToUpper();
+
+		if (viewModel.Color != null)
+			viewModel.Color = viewModel.Color.Trim();
+
+		if (viewModel.Model != null)
+			viewModel.Model = viewModel.Model.Trim();
+	}
+
+	// POST: PARKEDVEHICLES/Create
+	// To protect from overposting attacks, enable the specific properties you want to bind to.
+	// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+	[HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateParkVehicleViewModel viewModel)
     {
 
-		if (viewModel.RegistrationNumber != null)
-            viewModel.RegistrationNumber = viewModel.RegistrationNumber.Trim().ToUpper();
-
-		if (viewModel.Color != null)
-            viewModel.Color = viewModel.Color.Trim();
-
-		if (viewModel.Model != null)
-            viewModel.Model = viewModel.Model.Trim();
-
+		NormalizeInput(viewModel);
 
 		bool isAlreadyParked = await _context.ParkedVehicles
 		.AnyAsync(v => v.RegistrationNumber == viewModel.RegistrationNumber);
