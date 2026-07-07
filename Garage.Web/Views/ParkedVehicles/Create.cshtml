@@ -1,66 +1,108 @@
-@model Garage.Web.Models.ParkedVehicle
+@model CreateParkVehicleViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Park Vehicle";
 }
 
-<h1>Create</h1>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
 
-<h4>ParkedVehicle</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <div class="form-group">
-                <label asp-for="RegistrationNumber" class="control-label"></label>
-                <input asp-for="RegistrationNumber" class="form-control" />
-                <span asp-validation-for="RegistrationNumber" class="text-danger"></span>
+            <div class="text-center mb-4">
+                <h1 class="display-6">Vehicle Check-In</h1>
+                <p class="text-muted">Park your Vehicle.</p>
             </div>
 
-            <div class="form-group">
-                <label asp-for="VehicleType" class="control-label"></label>
-                <input asp-for="VehicleType" class="form-control" />
-                <span asp-validation-for="VehicleType" class="text-danger"></span>
-            </div>
+            <form asp-action="Create" method="post" class="p-4 bg-light rounded border shadow-sm">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            <div class="form-group">
-                <label asp-for="Color" class="control-label"></label>
-                <input asp-for="Color" class="form-control" />
-                <span asp-validation-for="Color" class="text-danger"></span>
-            </div>
+                @foreach (var property in ViewData.ModelMetadata.Properties)
+                {
 
-            <div class="form-group">
-                <label asp-for="NumberOfWheels" class="control-label"></label>
-                <input asp-for="NumberOfWheels" class="form-control" />
-                <span asp-validation-for="NumberOfWheels" class="text-danger"></span>
-            </div>
+                    // Fallback: If DisplayName is missing/null, use the raw C# PropertyName instead
+                    var labelText = property.DisplayName ?? property.PropertyName ?? string.Empty;
 
-            <div class="form-group">
-                <label asp-for="Model" class="control-label"></label>
-                <input asp-for="Model" class="form-control" />
-                <span asp-validation-for="Model" class="text-danger"></span>
-            </div>
 
-            <div class="form-group">
-                <label asp-for="BrandType" class="control-label"></label>
-                <input asp-for="BrandType" class="form-control" />
-                <span asp-validation-for="BrandType" class="text-danger"></span>
-            </div>
+                    // 1. EXTRACT POSTED VALUE: Grabs the data the user typed before the database check failed
+                    var postedValue = property.PropertyGetter?.Invoke(Model)?.ToString() ?? "";
 
-            <div class="form-group">
-                <label asp-for="ArrivedTime" class="control-label"></label>
-                <input asp-for="ArrivedTime" class="form-control" />
-                <span asp-validation-for="ArrivedTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+                    // 2. EXTRACT SERVER ERROR: Checks if the Controller added a ModelState error for this property
+                    var hasServerError = ViewData.ModelState.TryGetValue(property.PropertyName ?? "", out var modelStateEntry);
+                    var serverErrorMessage = hasServerError ? modelStateEntry?.Errors.FirstOrDefault()?.ErrorMessage : "";
+
+
+                    <!-- DYNAMIC VALIDATION EXTRACTOR -->
+                    <!-- We read the validation rules from C# metadata to use them in HTML -->
+                    var isRequired = property.IsRequired;
+
+                    // Look for Range attribute data
+                    var rangeAttribute = property.ValidatorMetadata.OfType<System.ComponentModel.DataAnnotations.RangeAttribute>().FirstOrDefault();
+
+                    // Look for StringLength attribute data
+                    var lengthAttribute = property.ValidatorMetadata.OfType<System.ComponentModel.DataAnnotations.StringLengthAttribute>().FirstOrDefault();
+
+
+                    <div class="mb-3">
+                        <!-- Safely uses the labelText variable -->
+                        <label for="@property.PropertyName" class="form-label fw-bold">
+                            @labelText
+                        </label>
+
+                        <!-- DYNAMIC ENUM HANDLER (VehicleType & BrandType) -->
+                        @if (property.ModelType.IsEnum)
+                        {
+                            <select name="@property.PropertyName" id="@property.PropertyName" class="form-select"
+                                data-val="@(isRequired ? "true" : "false")"
+                                data-val-required="Please select a @labelText.ToLower().">
+                                <option value="">-- Select @labelText --</option>
+                                @foreach (var value in Enum.GetValues(property.ModelType))
+                                {
+                                    // Checks if this specific dropdown option was the one selected by the user
+                                    var isSelected = postedValue == value.ToString();
+
+                                    <!option value="@((int)value)" selected="@(isSelected ? "selected" : null)">@value.ToString()</!option>                                    
+                                }
+                            </select>
+                        }
+                        <!-- NUMBER HANDLER (WheelsCount) -->
+                        @if (property.ModelType.Name == "Int32")
+                        {
+                            <input type="number" name="@property.PropertyName" id="@property.PropertyName" class="form-control" placeholder="Enter number..."
+                            value="@postedValue"
+                            data-val="true"
+                            data-val-required="The @labelText field is required."
+                            data-val-range="@(rangeAttribute != null ? $"The field {labelText} must be between {rangeAttribute.Minimum} and {rangeAttribute.Maximum}." : "")"
+                            data-val-range-min="@(rangeAttribute?.Minimum)"
+                            data-val-range-max="@(rangeAttribute?.Maximum)" />
+                        }
+                        <!-- DEFAULT TO STANDARD TEXT INPUT (RegistrationNumber, Color, Model) -->
+                        @if (!property.ModelType.IsEnum && property.ModelType.Name != "Int32")
+                        {
+                            <input type="text" name="@property.PropertyName" id="@property.PropertyName" class="form-control" placeholder="Enter details..."
+                            value="@postedValue"
+                            data-val="true"
+                            data-val-required="The @labelText field is required."
+                            data-val-length="@(lengthAttribute != null ? $"The {labelText} must be between {lengthAttribute.MinimumLength} and {lengthAttribute.MaximumLength} characters." : "")"
+                            data-val-length-min="@(lengthAttribute?.MinimumLength)"
+                            data-val-length-max="@(lengthAttribute?.MaximumLength)" />
+                        }
+
+                        <span class="text-dangerfield field-validation-error" data-valmsg-for="@property.PropertyName" data-valmsg-replace="true">
+                            @serverErrorMessage
+                        </span>                        
+                    </div>
+                }
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-success w-100 py-2">Park Vehicle</button>
+                    <a asp-action="Index" class="btn btn-secondary w-100 py-2 text-center">Cancel</a>
+                </div>
+            </form>
+
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

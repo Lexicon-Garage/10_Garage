@@ -62,24 +62,57 @@ public class ParkedVehiclesController : Controller
     // GET: PARKEDVEHICLES/Create
     public IActionResult Create()
     {
-        return View();
+		return View();
     }
 
-    // POST: PARKEDVEHICLES/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
+	private void NormalizeInput(CreateParkVehicleViewModel viewModel)
+	{
+		if (viewModel.RegistrationNumber != null)
+			viewModel.RegistrationNumber = viewModel.RegistrationNumber.Trim().ToUpper();
+
+		if (viewModel.Color != null)
+			viewModel.Color = viewModel.Color.Trim();
+
+		if (viewModel.Model != null)
+			viewModel.Model = viewModel.Model.Trim();
+	}
+
+	// POST: PARKEDVEHICLES/Create
+	// To protect from overposting attacks, enable the specific properties you want to bind to.
+	// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+	[HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,RegistrationNumber,VehicleType,Color,NumberOfWheels,Model,BrandType,ArrivedTime")] ParkedVehicle parkedvehicle)
+    public async Task<IActionResult> Create(CreateParkVehicleViewModel viewModel)
     {
-        if (ModelState.IsValid)
-        {
-            _context.Add(parkedvehicle);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-        return View(parkedvehicle);
-    }
+
+		NormalizeInput(viewModel);
+
+		bool isAlreadyParked = await _context.ParkedVehicles
+		.AnyAsync(v => v.RegistrationNumber == viewModel.RegistrationNumber);
+
+		if (isAlreadyParked)
+            ModelState.AddModelError("RegistrationNumber", "A vehicle with this registration number is already parked in the garage.");
+
+
+		if (ModelState.IsValid)
+		{
+			var vehicle = new ParkedVehicle
+			{
+				VehicleType = viewModel.VehicleType,
+				RegistrationNumber = viewModel.RegistrationNumber!,
+				Color = viewModel.Color,
+				BrandType = viewModel.Brand,
+                Model = viewModel.Model,
+				NumberOfWheels = viewModel.WheelsCount,
+				ArrivedTime = DateTime.Now
+            };
+
+			_context.Add(vehicle);
+			await _context.SaveChangesAsync();
+			return RedirectToAction(nameof(Index));
+		}
+		return View(viewModel);
+	}
 
     // GET: PARKEDVEHICLES/Edit/5
     public async Task<IActionResult> Edit(int? id)
