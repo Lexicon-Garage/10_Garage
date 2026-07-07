@@ -6,30 +6,29 @@
 
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6 p-4 bg-light rounded border shadow-sm">
+        <div class="col-md-8 col-lg-6 p-4 bg-light rounded border shadow-sm ">
 
-    <div class="text-center mb-4">
-        <h1 class="display-6">Details page</h1>
+            <div class="text-center mb-4">
+                <h1 class="display-6">Details page</h1>
 
-        <p class="text-muted">For parked vehicle - number @Html.DisplayFor(model => model.RegistrationNumber)
-        </p>
-        <hr/>
-    </div>
- 
-    <dl>
-        <dt class="col-sm-4">
-            @Html.DisplayNameFor(model => model.RegistrationNumber)
-        </dt>
-        <dd class="col-sm-8">
-            @Html.DisplayFor(model => model.RegistrationNumber)
-        </dd>
-    </dl>
+                <p class="text-muted">For parked vehicle - number @Html.DisplayFor(model => model.RegistrationNumber)
+                </p>
+                <hr/>
+            </div>
     <dl>
         <dt class="col-sm-4">
             @Html.DisplayNameFor(model => model.VehicleType)
         </dt>
         <dd class="col-sm-8">
             @Html.DisplayFor(model => model.VehicleType)
+        </dd>
+    </dl>
+    <dl>
+        <dt class="col-sm-4">
+            @Html.DisplayNameFor(model => model.RegistrationNumber)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.RegistrationNumber)
         </dd>
     </dl>
     <dl>
@@ -41,11 +40,11 @@
         </dd>
     </dl>
     <dl>
-        <dt class="col-sm-4">
-            @Html.DisplayNameFor(model => model.NumberOfWheels)
+        <dt class="col-sm-">
+            @Html.DisplayNameFor(model => model.BrandType)
         </dt>
         <dd class="col-sm-8">
-            @Html.DisplayFor(model => model.NumberOfWheels)
+            @Html.DisplayFor(model => model.BrandType)
         </dd>
     </dl>
     <dl>
@@ -57,13 +56,14 @@
         </dd>
     </dl>
     <dl>
-        <dt class="col-sm-">
-            @Html.DisplayNameFor(model => model.BrandType)
+        <dt class="col-sm-4">
+            @Html.DisplayNameFor(model => model.NumberOfWheels)
         </dt>
         <dd class="col-sm-8">
-            @Html.DisplayFor(model => model.BrandType)
+            @Html.DisplayFor(model => model.NumberOfWheels)
         </dd>
     </dl>
+
     <dl>
         <dt class="col-sm-4">
             @Html.DisplayNameFor(model => model.ArrivedTime)
