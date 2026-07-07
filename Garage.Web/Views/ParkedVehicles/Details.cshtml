@@ -1,22 +1,26 @@
-@model Garage.Web.Models.ParkedVehicle
-
+@model Garage.Web.ViewModels.ParkedVehicleDetailsViewModel
 @{
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>Details page</h1>
 
 <div>
-    <h4>ParkedVehicle</h4>
+    <h4>For parked vehicle - number @Html.DisplayFor(model => model.RegistrationNumber)
+    </h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RegistrationNumber)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RegistrationNumber)
-        </dd>
+   
     </dl>
+    <dl>
+    <dt class = "col-sm-2">
+        @Html.DisplayNameFor(model => model.RegistrationNumber)
+    </dt>
+    <dd class = "col-sm-10">
+        @Html.DisplayFor(model => model.RegistrationNumber)
+    </dd>
+    </dl>
+    <dl>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.VehicleType)
         </dt>
@@ -24,6 +28,7 @@
             @Html.DisplayFor(model => model.VehicleType)
         </dd>
     </dl>
+    <dl>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Color)
         </dt>
@@ -31,6 +36,7 @@
             @Html.DisplayFor(model => model.Color)
         </dd>
     </dl>
+    <dl>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.NumberOfWheels)
         </dt>
@@ -38,6 +44,7 @@
             @Html.DisplayFor(model => model.NumberOfWheels)
         </dd>
     </dl>
+    <dl>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Model)
         </dt>
@@ -45,6 +52,7 @@
             @Html.DisplayFor(model => model.Model)
         </dd>
     </dl>
+    <dl>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.BrandType)
         </dt>
@@ -52,6 +60,7 @@
             @Html.DisplayFor(model => model.BrandType)
         </dd>
     </dl>
+    <dl>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.ArrivedTime)
         </dt>
@@ -61,6 +70,6 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Back to List</a> |
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit details</a> 
 </div>

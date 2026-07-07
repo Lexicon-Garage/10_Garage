@@ -56,7 +56,19 @@ public class ParkedVehiclesController : Controller
             return NotFound();
         }
 
-        return View(parkedvehicle);
+        var viewModel = new ParkedVehicleDetailsViewModel
+        {
+            Id = parkedvehicle.Id,
+            RegistrationNumber = parkedvehicle.RegistrationNumber,
+            VehicleType = parkedvehicle.VehicleType,
+            Color = parkedvehicle.Color,
+            NumberOfWheels = parkedvehicle.NumberOfWheels,
+            Model = parkedvehicle.Model,
+            BrandType = parkedvehicle.BrandType,
+            ArrivedTime = parkedvehicle.ArrivedTime
+        };
+
+        return View(viewModel);
     }
 
     // GET: PARKEDVEHICLES/Create

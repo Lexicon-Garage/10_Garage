@@ -27,7 +27,7 @@ namespace Garage.Web.Models
 
         [EnumDataType(typeof(BrandType))]
         public required BrandType BrandType { get; set; }
-
+            
         [DataType(DataType.DateTime)]
         public required DateTime ArrivedTime { get; init; }
     }
