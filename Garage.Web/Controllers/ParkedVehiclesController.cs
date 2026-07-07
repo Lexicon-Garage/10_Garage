@@ -120,7 +120,7 @@ public class ParkedVehiclesController : Controller
     public async Task<IActionResult> Create(CreateParkVehicleViewModel viewModel)
     {
 
-		NormalizeInput(viewModel);
+        NormalizeInput(viewModel);
 
 		bool isAlreadyParked = await _context.ParkedVehicles
 		.AnyAsync(v => v.RegistrationNumber == viewModel.RegistrationNumber);
@@ -144,7 +144,9 @@ public class ParkedVehiclesController : Controller
 
 			_context.Add(vehicle);
 			await _context.SaveChangesAsync();
-			return RedirectToAction(nameof(Index));
+            TempData["SuccessMessage"] = "The vehicle had been created";
+
+            return RedirectToAction(nameof(Index));
 		}
 		return View(viewModel);
 	}
@@ -212,6 +214,7 @@ public class ParkedVehiclesController : Controller
         vehicle.BrandType = parkedViewvehicle.BrandType;
 
         _context.SaveChanges();
+        TempData["SuccessMessage"] = "The vehicle had been updated successfuly";
 
         return RedirectToAction(nameof(Index));
     }
@@ -257,6 +260,7 @@ public class ParkedVehiclesController : Controller
         await _context.SaveChangesAsync();
 
         TempData["Receipt"] = JsonSerializer.Serialize(receipt);
+        TempData["SuccessMessage"] = "The vehicle had been uparcked successfuly";
 
         return RedirectToAction("Index", "Receipts");
     }
