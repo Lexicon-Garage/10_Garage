@@ -17,16 +17,36 @@ public class ParkedVehiclesController : Controller
     }
 
     // GET: PARKEDVEHICLES
-    public async Task<IActionResult> Index(string? searchString)    
+    public async Task<IActionResult> Index(string? searchString, string? sortColumn, string? sortDir)    
     {
 
     var query = _context.ParkedVehicles.AsQueryable();
 
-    if (!string.IsNullOrEmpty(searchString))
+    // --- Search (extended) ---
+    if (!string.IsNullOrWhiteSpace(searchString))
     {
         var term = searchString.Trim();
-        query = query.Where(v => v.RegistrationNumber.Contains(term));
+        var isType = Enum.TryParse<VehicleType>(term, true, out var type);
+
+        query = query.Where(v =>
+            v.RegistrationNumber.Contains(term) ||
+            (v.Color != null && v.Color.Contains(term)) ||
+            (v.Model != null && v.Model.Contains(term)) ||
+            (isType && v.VehicleType == type));
     }
+
+    // --- Sort ---
+    bool desc = sortDir == "desc";
+    query = sortColumn switch
+    {
+        "type"    => desc ? query.OrderByDescending(v => v.VehicleType)
+                          : query.OrderBy(v => v.VehicleType),
+        "reg"     => desc ? query.OrderByDescending(v => v.RegistrationNumber)
+                          : query.OrderBy(v => v.RegistrationNumber),
+        "arrived" => desc ? query.OrderByDescending(v => v.ArrivedTime)
+                          : query.OrderBy(v => v.ArrivedTime),
+        _         => query.OrderBy(v => v.ArrivedTime)
+    };
 
     var vehicles = await query
         .Select(v => new ParkedVehicleOverviewViewModel
@@ -37,9 +57,12 @@ public class ParkedVehiclesController : Controller
             ArrivedTime = v.ArrivedTime
         })
         .ToListAsync();
+
          ViewData["SearchString"] = searchString;
-         
-    return View(vehicles);
+         ViewData["SortColumn"] = sortColumn;
+         ViewData["SortDir"] = desc ? "desc" : "asc";
+        
+         return View(vehicles);
     }
     // GET: PARKEDVEHICLES/Details/5
     public async Task<IActionResult> Details(int? id)
