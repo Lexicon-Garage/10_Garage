@@ -1,106 +1,146 @@
-# Garage 2.0 — Database & Parking Logic Design
+# Garage 2.0 — Parking Spots Design (README)
 
-A design document for the extended Garage exercise: fixed parking spots, vehicles of
-different sizes, motorcycle sharing (⅓ spot each), statistics, and a dropdown that only
-offers vehicle types that can actually be parked right now.
+How we add **fixed parking spots**, **vehicle sizes**, **motorcycle sharing (⅓ spot)**,
+**statistics**, and a **smart dropdown** to the Garage — with `VehicleType` as a database
+table instead of an enum.
 
 ---
 
-## 1. Class Diagram
+## 1. The big picture
 
 ```mermaid
-classDiagram
-    class VehicleType {
-        +int Id
-        +string Name
-        +int Size
-        +int Wheels
-        +decimal PricePerHour
-    }
-
-    class ParkedVehicle {
-        +int Id
-        +string RegistrationNumber
-        +string Color
-        +string Brand
-        +string Model
-        +DateTime ArrivalTime
-        +int VehicleTypeId
-    }
-
-    class ParkingSpot {
-        +int Id
-        +int SpotNumber
-    }
-
-    class VehicleSpot {
-        +int ParkedVehicleId
-        +int ParkingSpotId
-    }
-
-    VehicleType "1" --> "*" ParkedVehicle : classifies
-    ParkedVehicle "1" --> "1..*" VehicleSpot : occupies
-    ParkingSpot "1" --> "0..3" VehicleSpot : holds
+flowchart LR
+    A[User picks vehicle type] --> B{Dropdown:<br/>type available?}
+    B -- greyed out --> A
+    B -- enabled --> C[Fill in vehicle form]
+    C --> D[ParkingService finds spots]
+    D --> E[(Save vehicle +<br/>VehicleSpot rows)]
+    E --> F[Overview shows<br/>vehicle + spot numbers]
+    F --> G[Check out]
+    G --> H[(Delete vehicle,<br/>cascade frees spots)]
+    H --> I[Receipt with price,<br/>duration & spots]
 ```
 
-**Key idea:** the relationship between vehicles and spots is *many-to-many* via the
-`VehicleSpot` junction table.
-
-- A **truck** (2 spots) → 2 rows in `VehicleSpot`.
-- A **boat/airplane** (3 spots) → 3 rows.
-- A **motorcycle** (⅓ spot) → 1 row, and up to 3 motorcycles may share the same spot.
-
-`Size` is measured in **thirds of a spot** so all math stays in integers:
-
-| Type       | Size (thirds) | Spots occupied |
-|------------|---------------|----------------|
-| Motorcycle | 1             | ⅓              |
-| Car        | 3             | 1              |
-| Bus        | 6             | 2              |
-| Truck      | 6             | 2              |
-| Boat       | 9             | 3              |
-| Airplane   | 9             | 3              |
+Everything — occupancy, statistics, the dropdown — is **derived from one table**
+(`VehicleSpot`). No counters to keep in sync, nothing that can disagree with reality.
 
 ---
 
-## 2. Entity Classes (EF Core)
+## 2. Why VehicleType becomes a table (not an enum)
+
+| | Enum + switch-statements | **Table (this design)** |
+|---|---|---|
+| Size & price live in… | Code (two parallel switches) | One DB row per type |
+| Add a new type | Code change + rebuild | `INSERT` one row |
+| Change a price | Redeploy | Update one value |
+| Enum reorder bug risk | Yes (stored ints shift) | None |
+| Dropdown source | `Enum.GetValues` | The table itself |
+| Garage 3.0 ready | No — redesign needed | Yes — same shape |
+
+## 3. Data model
+
+```mermaid
+erDiagram
+    VehicleType ||--o{ ParkedVehicle : classifies
+    ParkedVehicle ||--|{ VehicleSpot : occupies
+    ParkingSpot ||--o{ VehicleSpot : holds
+
+    VehicleType {
+        int Id PK
+        string Name
+        int Size "in thirds of a spot"
+        decimal PricePerHour
+    }
+    ParkedVehicle {
+        int Id PK
+        string RegistrationNumber UK
+        string Color
+        string Brand
+        string Model
+        int NumberOfWheels
+        datetime ArrivedTime
+        int VehicleTypeId FK
+    }
+    ParkingSpot {
+        int Id PK
+        int SpotNumber UK
+    }
+    VehicleSpot {
+        int ParkedVehicleId PK_FK
+        int ParkingSpotId PK_FK
+    }
+```
+
+**Key idea:** vehicle ↔ spot is *many-to-many* through `VehicleSpot`:
+
+- A car (1 spot) → **1 row**
+- A bus (2 spots) → **2 rows**
+- A boat (3 spots) → **3 rows**
+- A motorcycle (⅓ spot) → **1 row**, and up to **3 motorcycles share one spot**
+
+### Sizes in thirds — integer math only
+
+| Type | Size (thirds) | Spots | Price/hour |
+|---|---|---|---|
+| Motorcycle | 1 | ⅓ | 10 kr |
+| Car | 3 | 1 | 20 kr |
+| Bus | 6 | 2 | 40 kr |
+| Truck | 6 | 2 | 40 kr |
+| Boat | 9 | 3 | 60 kr |
+
+Every spot has capacity **3 thirds**. No floats, no rounding surprises.
+
+### Spot occupancy at a glance
+
+```text
+Spot:      1     2     3     4     5     6     7
+        ┌─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+        │ CAR │ MC  │     │ BUS───BUS │ MC  │     │
+        │     │ MC  │     │           │     │     │
+        │     │     │     │           │     │     │
+        └─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+Status:  FULL  PART  FREE  FULL  FULL  PART  FREE
+Thirds:  0/3   1/3   3/3   0/3   0/3   2/3   3/3   free
+```
+
+A spot is in exactly one of three states:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Free
+    Free --> Full : big vehicle parks
+    Free --> Partial : 1st motorcycle
+    Partial --> Partial : 2nd motorcycle
+    Partial --> Full : 3rd motorcycle
+    Full --> Free : big vehicle checks out
+    Partial --> Free : last motorcycle leaves
+    Full --> Partial : one of 3 motorcycles leaves
+```
+
+---
+
+## 4. Entity classes
 
 ```csharp
 public class VehicleType
 {
     public int Id { get; set; }
     public string Name { get; set; } = "";
-    public int Size { get; set; }            // in thirds of a spot
-    public int Wheels { get; set; }
+    public int Size { get; set; }              // in thirds of a spot
     public decimal PricePerHour { get; set; }
 
     public ICollection<ParkedVehicle> Vehicles { get; set; } = new List<ParkedVehicle>();
 }
 
-public class ParkedVehicle
-{
-    public int Id { get; set; }
-    public string RegistrationNumber { get; set; } = "";
-    public string Color { get; set; } = "";
-    public string Brand { get; set; } = "";
-    public string Model { get; set; } = "";
-    public DateTime ArrivalTime { get; set; }
-
-    public int VehicleTypeId { get; set; }
-    public VehicleType VehicleType { get; set; } = null!;
-
-    public ICollection<VehicleSpot> Spots { get; set; } = new List<VehicleSpot>();
-}
-
 public class ParkingSpot
 {
     public int Id { get; set; }
-    public int SpotNumber { get; set; }      // 1..N
+    public int SpotNumber { get; set; }        // 1..N
 
     public ICollection<VehicleSpot> Vehicles { get; set; } = new List<VehicleSpot>();
 }
 
-public class VehicleSpot   // junction table
+public class VehicleSpot                        // junction table
 {
     public int ParkedVehicleId { get; set; }
     public ParkedVehicle ParkedVehicle { get; set; } = null!;
@@ -110,239 +150,104 @@ public class VehicleSpot   // junction table
 }
 ```
 
+`ParkedVehicle` changes: the `VehicleType` enum property is replaced by
+`int VehicleTypeId` + navigation, and it gains
+`ICollection<VehicleSpot> Spots`. (`NumberOfWheels` stays on the vehicle —
+a specific car knows its own wheels.)
+
 ### DbContext configuration
 
 ```csharp
-public class GarageContext : DbContext
+protected override void OnModelCreating(ModelBuilder b)
 {
-    public DbSet<VehicleType> VehicleTypes => Set<VehicleType>();
-    public DbSet<ParkedVehicle> ParkedVehicles => Set<ParkedVehicle>();
-    public DbSet<ParkingSpot> ParkingSpots => Set<ParkingSpot>();
-    public DbSet<VehicleSpot> VehicleSpots => Set<VehicleSpot>();
+    b.Entity<VehicleSpot>()
+        .HasKey(vs => new { vs.ParkedVehicleId, vs.ParkingSpotId });
 
-    protected override void OnModelCreating(ModelBuilder b)
-    {
-        b.Entity<VehicleSpot>()
-            .HasKey(vs => new { vs.ParkedVehicleId, vs.ParkingSpotId });
+    b.Entity<ParkedVehicle>()
+        .HasIndex(v => v.RegistrationNumber).IsUnique();
 
-        b.Entity<ParkedVehicle>()
-            .HasIndex(v => v.RegistrationNumber)
-            .IsUnique();
+    b.Entity<ParkingSpot>()
+        .HasIndex(s => s.SpotNumber).IsUnique();
 
-        b.Entity<ParkingSpot>()
-            .HasIndex(s => s.SpotNumber)
-            .IsUnique();
+    b.Entity<VehicleType>().HasData(
+        new VehicleType { Id = 1, Name = "Motorcycle", Size = 1, PricePerHour = 10 },
+        new VehicleType { Id = 2, Name = "Car",        Size = 3, PricePerHour = 20 },
+        new VehicleType { Id = 3, Name = "Bus",        Size = 6, PricePerHour = 40 },
+        new VehicleType { Id = 4, Name = "Truck",      Size = 6, PricePerHour = 40 },
+        new VehicleType { Id = 5, Name = "Boat",       Size = 9, PricePerHour = 60 });
 
-        // Seed vehicle types
-        b.Entity<VehicleType>().HasData(
-            new VehicleType { Id = 1, Name = "Motorcycle", Size = 1, Wheels = 2, PricePerHour = 10 },
-            new VehicleType { Id = 2, Name = "Car",        Size = 3, Wheels = 4, PricePerHour = 20 },
-            new VehicleType { Id = 3, Name = "Bus",        Size = 6, Wheels = 6, PricePerHour = 40 },
-            new VehicleType { Id = 4, Name = "Truck",      Size = 6, Wheels = 8, PricePerHour = 40 },
-            new VehicleType { Id = 5, Name = "Boat",       Size = 9, Wheels = 0, PricePerHour = 60 },
-            new VehicleType { Id = 6, Name = "Airplane",   Size = 9, Wheels = 3, PricePerHour = 60 });
-
-        // Seed 20 spots
-        b.Entity<ParkingSpot>().HasData(
-            Enumerable.Range(1, 20)
-                      .Select(n => new ParkingSpot { Id = n, SpotNumber = n }));
-    }
+    b.Entity<ParkingSpot>().HasData(
+        Enumerable.Range(1, 20).Select(n => new ParkingSpot { Id = n, SpotNumber = n }));
 }
 ```
 
 ---
 
-## 3. Core Parking Logic
+## 5. Parking logic — one DB read, pure logic after
 
-### Spot occupancy model
+The design's most important rule: **read spot statuses from the DB once**, then run all
+decisions as pure in-memory functions. This makes the logic unit-testable without a
+database and keeps the dropdown from firing one query per vehicle type.
 
-Every spot has a capacity of **3 thirds**:
-
-- **Free** — no vehicles. Anything may park (subject to contiguity for big vehicles).
-- **Partially free** — holds 1–2 motorcycles. Only motorcycles may join.
-- **Full** — holds a non-motorcycle vehicle, or 3 motorcycles.
+```mermaid
+flowchart TD
+    DB[(VehicleSpot rows)] -->|one query| S[List of SpotStatus]
+    S --> F1[FindSpotsIn - car]
+    S --> F2[FindSpotsIn - bus]
+    S --> F3[FindSpotsIn - motorcycle]
+    F1 & F2 & F3 --> DD[Dropdown: enable / grey out]
+    S --> P[Park: assign spots]
+    S --> O[Spot grid view]
+```
 
 ```csharp
 public record SpotStatus(ParkingSpot Spot, int MotorcycleCount, bool HasBigVehicle)
 {
-    public bool IsFree          => MotorcycleCount == 0 && !HasBigVehicle;
-    public bool AcceptsMc       => !HasBigVehicle && MotorcycleCount < 3;
+    public bool IsFree    => MotorcycleCount == 0 && !HasBigVehicle;
+    public bool AcceptsMc => !HasBigVehicle && MotorcycleCount < 3;
     public int  ThirdsAvailable => HasBigVehicle ? 0 : 3 - MotorcycleCount;
 }
 
-private async Task<List<SpotStatus>> GetSpotStatusesAsync()
-{
-    return await _context.ParkingSpots
+// The ONLY database call in the whole flow
+public async Task<List<SpotStatus>> GetSpotStatusesAsync() =>
+    await _context.ParkingSpots
         .OrderBy(s => s.SpotNumber)
         .Select(s => new SpotStatus(
             s,
-            s.Vehicles.Count(vs => vs.ParkedVehicle.VehicleType.Name == "Motorcycle"),
-            s.Vehicles.Any(vs => vs.ParkedVehicle.VehicleType.Name != "Motorcycle")))
-        .ToListAsync();
-}
-```
-
-### Assigning spots when parking
-
-```csharp
-public async Task<List<ParkingSpot>?> FindSpotsForAsync(VehicleType type)
-{
-    var statuses = await GetSpotStatusesAsync();
-
-    // Motorcycle: fill an already-started spot first
-    if (type.Size == 1)
-    {
-        var shared = statuses.FirstOrDefault(s => s.AcceptsMc && s.MotorcycleCount > 0)
-                  ?? statuses.FirstOrDefault(s => s.IsFree);
-        return shared is null ? null : new List<ParkingSpot> { shared.Spot };
-    }
-
-    // Car / truck / boat: need N *consecutive* fully free spots
-    int spotsNeeded = type.Size / 3;
-    var run = new List<ParkingSpot>();
-
-    foreach (var s in statuses)
-    {
-        if (s.IsFree)
-        {
-            // reset the run if spot numbers are not consecutive
-            if (run.Count > 0 && s.Spot.SpotNumber != run[^1].SpotNumber + 1)
-                run.Clear();
-
-            run.Add(s.Spot);
-            if (run.Count == spotsNeeded)
-                return run;
-        }
-        else
-        {
-            run.Clear();
-        }
-    }
-    return null;   // no room → this type should be greyed out in the dropdown
-}
-```
-
-### Parking and checkout
-
-```csharp
-public async Task<bool> ParkAsync(ParkedVehicle vehicle)
-{
-    var spots = await FindSpotsForAsync(vehicle.VehicleType);
-    if (spots is null) return false;
-
-    vehicle.ArrivalTime = DateTime.Now;
-    foreach (var spot in spots)
-        vehicle.Spots.Add(new VehicleSpot { ParkingSpot = spot });
-
-    _context.ParkedVehicles.Add(vehicle);
-    await _context.SaveChangesAsync();
-    return true;
-}
-
-public async Task<Receipt?> CheckOutAsync(string regNr)
-{
-    var vehicle = await _context.ParkedVehicles
-        .Include(v => v.VehicleType)
-        .Include(v => v.Spots).ThenInclude(vs => vs.ParkingSpot)
-        .FirstOrDefaultAsync(v => v.RegistrationNumber == regNr);
-
-    if (vehicle is null) return null;
-
-    var duration = DateTime.Now - vehicle.ArrivalTime;
-    var price = (decimal)duration.TotalHours * vehicle.VehicleType.PricePerHour;
-    var spotNumbers = vehicle.Spots.Select(vs => vs.ParkingSpot.SpotNumber).ToList();
-
-    _context.ParkedVehicles.Remove(vehicle);   // cascade deletes VehicleSpot rows
-    await _context.SaveChangesAsync();
-
-    return new Receipt(regNr, vehicle.ArrivalTime, duration, price, spotNumbers);
-}
-
-public record Receipt(string RegNr, DateTime Arrival, TimeSpan Duration,
-                      decimal Price, List<int> SpotNumbers);
-```
-
-### Statistics
-
-```csharp
-public async Task<StatisticsViewModel> GetStatisticsAsync()
-{
-    var vehicles = await _context.ParkedVehicles
-        .Include(v => v.VehicleType)
+            s.Vehicles.Count(vs => vs.ParkedVehicle.VehicleType.Size == 1),
+            s.Vehicles.Any(vs => vs.ParkedVehicle.VehicleType.Size > 1)))
         .ToListAsync();
 
-    var now = DateTime.Now;
-    return new StatisticsViewModel
-    {
-        CountPerType = vehicles
-            .GroupBy(v => v.VehicleType.Name)
-            .ToDictionary(g => g.Key, g => g.Count()),
-
-        TotalWheels = vehicles.Sum(v => v.VehicleType.Wheels),
-
-        RevenueSoFar = vehicles.Sum(v =>
-            (decimal)(now - v.ArrivalTime).TotalHours * v.VehicleType.PricePerHour)
-    };
-}
-```
-
-### Dropdown with unavailable types greyed out
-
-```csharp
-public async Task<List<SelectListItem>> GetTypeOptionsAsync()
+// Pure function: no DbContext, trivially unit-testable
+public static List<ParkingSpot>? FindSpotsIn(List<SpotStatus> statuses, VehicleType type)
 {
-    var types = await _context.VehicleTypes.ToListAsync();
-    var options = new List<SelectListItem>();
-
-    foreach (var type in types)
+    if (type.Size == 1)   // motorcycle: join a started spot first
     {
-        bool canPark = await FindSpotsForAsync(type) is not null;
-        options.Add(new SelectListItem
-        {
-            Value = type.Id.ToString(),
-            Text = type.Name,
-            Disabled = !canPark        // renders as a greyed-out <option>
-        });
+        var spot = statuses.FirstOrDefault(s => s.AcceptsMc && s.MotorcycleCount > 0)
+                ?? statuses.FirstOrDefault(s => s.IsFree);
+        return spot is null ? null : [spot.Spot];
     }
-    return options;
+
+    int needed = type.Size / 3;   // simplest rule: any N free spots
+    var free = statuses.Where(s => s.IsFree).Take(needed).Select(s => s.Spot).ToList();
+    return free.Count == needed ? free : null;
 }
 ```
+
+> **Bonus (optional):** if the requirement demands *consecutive* spots for big
+> vehicles, swap the two `free`-lines for the run-scanning loop. Do it as a separate
+> commit — the simple version above already fulfils "a bus takes 2 spots".
+
+### Motorcycle sharing, automatically
+
+```text
+Park MC #1  →  takes free spot 3        (spot 3: 1/3 used, PARTIAL)
+Park MC #2  →  joins spot 3             (spot 3: 2/3 used, PARTIAL)
+Park MC #3  →  joins spot 3             (spot 3: FULL)
+Park MC #4  →  takes next free spot 7   (spot 7: 1/3 used)
+```
+
+The rule "prefer a partially-filled spot" gives the assignment's
+*fill the same spot until full* behaviour with zero extra code.
 
 ---
-
-## 4. How It All Works — Walkthrough
-
-**Landing page.** The controller calls `GetSpotStatusesAsync()` and sums
-`ThirdsAvailable` across all spots. Displayed as e.g. *“12 ⅔ spots free of 20.”*
-Fully free vs. partially free counts can be shown separately.
-
-**Parking a car.** The dropdown only enables types that fit. On submit,
-`FindSpotsForAsync` returns the lowest-numbered free spot, one `VehicleSpot` row is
-written, and the receipt view shows the spot number.
-
-**Parking a truck.** `FindSpotsForAsync` scans spots in order looking for a run of
-2 consecutive free spots (the run resets on any gap or occupied spot). Two junction
-rows are written — the truck “remembers” both spots.
-
-**Parking motorcycles.** The first motorcycle takes a free spot. The second one finds
-that spot via the *“accepts motorcycles and already has at least one”* rule and joins
-it. The fourth motorcycle starts a new spot. This satisfies the assignment’s
-*“fill the same spot until full”* requirement automatically.
-
-**Checkout.** The vehicle row is deleted; cascade delete removes its junction rows,
-which instantly frees its spot(s) for the next arrival. Price = hours parked × the
-type’s hourly rate, computed on the fly — nothing stored, so it can never go stale.
-
-**Overview of spots.** Iterate `GetSpotStatusesAsync()` and render each spot as
-free / partial (1–2 motorcycles) / full, e.g. as a colored grid. Because the data
-comes from the junction table, this view can never disagree with reality.
-
-### Why this design
-
-- **Integers only.** Sizes in thirds (1, 3, 6, 9) avoid floating-point fractions entirely.
-- **One source of truth.** Occupancy, free counts, statistics, and the dropdown are all
-  *derived* from `VehicleSpot` rows — no counters to keep in sync.
-- **Constraints in the database.** The composite key prevents duplicate assignments;
-  the unique index on `RegistrationNumber` prevents double parking of the same vehicle.
-- **Ready for Garage 3.0.** The extra entities (`VehicleType`, `ParkingSpot`) are exactly
-  what the next exercise introduces, so nothing needs to be redesigned later.
