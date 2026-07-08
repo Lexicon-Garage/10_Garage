@@ -78,13 +78,18 @@
                         <!-- DEFAULT TO STANDARD TEXT INPUT (RegistrationNumber, Color, Model) -->
                         @if (!property.ModelType.IsEnum && property.ModelType.Name != "Int32")
                         {
+                            <!-- 1. EXTRACT REGEX DATA: Look for a RegularExpression attribute on this specific property -->
+                            var regexAttribute = property.ValidatorMetadata.OfType<System.ComponentModel.DataAnnotations.RegularExpressionAttribute>().FirstOrDefault();
+
                             <input type="text" name="@property.PropertyName" id="@property.PropertyName" class="form-control" placeholder="Enter details..."
                             value="@postedValue"
                             data-val="true"
                             data-val-required="The @labelText field is required."
                             data-val-length="@(lengthAttribute != null ? $"The {labelText} must be between {lengthAttribute.MinimumLength} and {lengthAttribute.MaximumLength} characters." : "")"
                             data-val-length-min="@(lengthAttribute?.MinimumLength)"
-                            data-val-length-max="@(lengthAttribute?.MaximumLength)" />
+                            data-val-length-max="@(lengthAttribute?.MaximumLength)"
+                            @(regexAttribute != null ? Html.Raw($"data-val-regex=\"{regexAttribute.ErrorMessage}\"") : null)
+                            @(regexAttribute != null ? Html.Raw($"data-val-regex-pattern=\"{regexAttribute.Pattern}\"") : null) />
                         }
 
                         <span class="text-danger field-validation-error" data-valmsg-for="@property.PropertyName" data-valmsg-replace="true">
