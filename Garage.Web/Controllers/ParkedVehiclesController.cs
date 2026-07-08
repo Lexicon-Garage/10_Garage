@@ -152,7 +152,7 @@ public class ParkedVehiclesController : Controller
 			}
 			catch (DbUpdateException)
 			{
-				TempData["ValidationMessage"] = "Database error: Could not save the vehicle data. Please try again.";
+				TempData["ValidationMessage"] = "Could not save the vehicle data. Please try again.";
 			}
 		}
 
