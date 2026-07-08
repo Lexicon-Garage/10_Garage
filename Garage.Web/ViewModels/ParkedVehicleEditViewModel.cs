@@ -8,14 +8,14 @@ namespace Garage.Web.ViewModels
     {
         public int Id { get; set; }
 
-        [Required]
-        [StringLength(60, MinimumLength = 5)]
+        [Required(ErrorMessage = "Registration number is required.")]
+        [RegularExpression(@"^[A-Za-z0-9]{2,10}$",
+         ErrorMessage = "2–10 letters or digits, no special characters.")]
         [Display(Name = "Registration Number")]
-
         public string RegistrationNumber { get; set; } = string.Empty;
+
         [EnumDataType(typeof(VehicleType))]
         [Display(Name = "Vehicle Type")]
-
         public VehicleType VehicleType { get; set; }
 
         [Required]
