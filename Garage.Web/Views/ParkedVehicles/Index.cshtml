@@ -11,7 +11,7 @@
 }
 
 <div class="text-center mb-4">
-    <h1 class="display-6">Parked vehicles</h1>
+    <h1 class="display-6" >Parked vehicles</h1>
 </div>
 <div class="d-flex justify-content-between mt-4">
     <p>
@@ -28,16 +28,7 @@
     </form>
 
 </div>
-<h1>Parked vehicles</h1>
-<form asp-action="Index" method="get" class="mb-3">
-    <div class="input-group" style="max-width: 400px;">
-        <input type="text" name="searchString" value="@ViewData["SearchString"]" class="form-control"
-               placeholder="Search by registration number" />
-        <button type="submit" class="btn btn-outline-primary">Search</button>
-    </div>
-    <input type="hidden" name="sortColumn" value="@curCol" />
-    <input type="hidden" name="sortDir" value="@curDir" />
-</form>
+
 @if (!Model.Any())
 {
     @if (!string.IsNullOrWhiteSpace(ViewData["SearchString"] as string))
@@ -57,7 +48,7 @@ else
             <tr>
                 <th>
                     <a asp-action="Index" asp-route-searchString="@ViewData["SearchString"]" asp-route-sortColumn="type"
-                       asp-route-sortDir="@NextDir("type")">Type@(Arrow("type"))</a>
+                       asp-route-sortDir="@NextDir("type")" >Type@(Arrow("type"))</a>
                 </th>
                 <th>
                     <a asp-action="Index" asp-route-searchString="@ViewData["SearchString"]" asp-route-sortColumn="reg"
@@ -80,9 +71,9 @@ else
                     <td>@item.ArrivedTime.ToString("yyyy-MM-dd HH:mm")</td>
                     <td>@item.ParkedDurationDisplay</td>
                     <td>
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="CheckOut" asp-route-id="@item.Id">Check out</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">Details</a> |
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="text-decoration-none">Edit</a> |
+                        <a asp-action="CheckOut" asp-route-id="@item.Id" class="text-decoration-none">Check out</a>
                     </td>
                 </tr>
             }
