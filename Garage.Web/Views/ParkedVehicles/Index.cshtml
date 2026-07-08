@@ -20,9 +20,6 @@
     <input type="hidden" name="sortColumn" value="@curCol" />
     <input type="hidden" name="sortDir" value="@curDir" />
 </form>
-<p>
-    <a asp-action="Create" class="btn btn-primary">Park a vehicle</a>
-</p>
 @if (!Model.Any())
 {
     @if (!string.IsNullOrWhiteSpace(ViewData["SearchString"] as string))
