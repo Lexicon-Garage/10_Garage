@@ -16,10 +16,23 @@ namespace Garage.Web
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            builder.Services.AddDbContext<AppDbConext>(options =>
-            options.UseSqlServer(
-            builder.Configuration.GetConnectionString("DefaultConnection")));
-			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
+            if (builder.Environment.IsEnvironment("Testing"))
+            {
+                builder.Services.AddDbContext<AppDbConext>(options =>
+                {
+                    options.UseInMemoryDatabase("GarageIntegrationDb");
+                });
+            }
+            else
+            {
+                builder.Services.AddDbContext<AppDbConext>(options =>
+                {
+                    options.UseSqlServer(
+                        builder.Configuration.GetConnectionString("DefaultConnection"));
+                });
+            }
+
+            builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
             var app = builder.Build();
 	
 			// Configure the HTTP request pipeline.
