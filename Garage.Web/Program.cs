@@ -21,7 +21,13 @@ namespace Garage.Web
             builder.Configuration.GetConnectionString("DefaultConnection")));
 			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
             var app = builder.Build();
-	
+			
+			using (var scope = app.Services.CreateScope())
+			{
+    			var context = scope.ServiceProvider.GetRequiredService<AppDbConext>();
+    			DbInitializer.Seed(context);
+			}
+			
 			// Configure the HTTP request pipeline.
 			if (!app.Environment.IsDevelopment())
 			{
