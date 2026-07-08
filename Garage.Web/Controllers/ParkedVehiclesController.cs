@@ -260,7 +260,7 @@ public class ParkedVehiclesController : Controller
         await _context.SaveChangesAsync();
 
         TempData["Receipt"] = JsonSerializer.Serialize(receipt);
-        TempData["SuccessMessage"] = "The vehicle had been uparked successfuly";
+        TempData["SuccessMessage"] = "The vehicle has been checked out successfully.";
 
         return RedirectToAction("Index", "Receipts");
     }
