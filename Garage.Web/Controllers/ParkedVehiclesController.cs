@@ -27,12 +27,13 @@ public class ParkedVehiclesController : Controller
 		{
 			var term = searchString.Trim();
 			var isType = Enum.TryParse<VehicleType>(term, true, out var type);
-
-			query = query.Where(v =>
-				v.RegistrationNumber.Contains(term) ||
-				(v.Color != null && v.Color.Contains(term)) ||
-				(v.Model != null && v.Model.Contains(term)) ||
-				(isType && v.VehicleType == type));
+			
+		// Search relies on SQL Server's case-insensitive collation. The InMemory test provider is case-sensitive
+				query = query.Where(v =>
+					v.RegistrationNumber.ToUpper().Contains(term) ||
+					(v.Color != null && v.Color.ToUpper().Contains(term)) ||
+					(v.Model != null && v.Model.ToUpper().Contains(term)) ||
+					(isType && v.VehicleType == type));
 		}
 
 		// --- Sort ---
