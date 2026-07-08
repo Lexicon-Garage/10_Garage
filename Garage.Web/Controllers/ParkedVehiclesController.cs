@@ -200,18 +200,27 @@ public class ParkedVehiclesController : Controller
 	public async Task<IActionResult> Edit(int? id, [Bind("Id,RegistrationNumber,VehicleType,Color,NumberOfWheels,Model,BrandType,ArrivedTime")] ParkedVehicleEditViewModel parkedViewvehicle)
 	{
 		if (!ModelState.IsValid)
+		{
+			parkedViewvehicle.BrandTypes = EnumHelper.ToSelectList<BrandType>();
+			parkedViewvehicle.VehicleTypes = EnumHelper.ToSelectList<VehicleType>();
 			return View(parkedViewvehicle);
+		}
 
 		var vehicle = _context.ParkedVehicles.Find(parkedViewvehicle.Id);
 		if (vehicle == null)
 			return NotFound();
 
+		var reg = parkedViewvehicle.RegistrationNumber.Trim().ToUpper();
+
 		bool exists = _context.ParkedVehicles.Any(v =>
-			v.RegistrationNumber == parkedViewvehicle.RegistrationNumber && v.Id != parkedViewvehicle.Id);
+			v.RegistrationNumber == reg && v.Id != parkedViewvehicle.Id);
 
 		if (exists)
 		{
-			ModelState.AddModelError("RegistrationNumber", "Already exists");
+			ModelState.AddModelError("RegistrationNumber",
+				$"A vehicle with registration number {reg} is already parked.");
+			parkedViewvehicle.BrandTypes = EnumHelper.ToSelectList<BrandType>();
+			parkedViewvehicle.VehicleTypes = EnumHelper.ToSelectList<VehicleType>();
 			return View(parkedViewvehicle);
 		}
 		try
@@ -280,7 +289,7 @@ public class ParkedVehiclesController : Controller
 			TempData["Receipt"] = JsonSerializer.Serialize(receipt);
 			TempData["ValidationMessage"] = "The vehicle has been checked out successfully.";
 		}
-		catch (DbUpdateException) 
+		catch (DbUpdateException)
 		{
 			TempData["ValidationMessage"] = "Could not check out the vehicle. Please try again.";
 		}
