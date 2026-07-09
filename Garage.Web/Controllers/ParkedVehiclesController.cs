@@ -3,6 +3,7 @@ using Garage.Web.Data;
 using Garage.Web.Helper;
 using Garage.Web.Models;
 using Garage.Web.ViewModels;
+using Garage.Web.ViewModels.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
@@ -100,7 +101,7 @@ public class ParkedVehiclesController : Controller
 		return View();
 	}
 
-	private void NormalizeInput(CreateParkVehicleViewModel viewModel)
+	private void NormalizeInput(IVehicleFormModel viewModel)
 	{
 		if (viewModel.RegistrationNumber != null)
 			viewModel.RegistrationNumber = viewModel.RegistrationNumber.Trim().ToUpper();
@@ -205,6 +206,7 @@ public class ParkedVehiclesController : Controller
 			parkedViewvehicle.VehicleTypes = EnumHelper.ToSelectList<VehicleType>();
 			return View(parkedViewvehicle);
 		}
+		NormalizeInput(parkedViewvehicle);
 
 		var vehicle = _context.ParkedVehicles.Find(parkedViewvehicle.Id);
 		if (vehicle == null)

@@ -1,30 +1,31 @@
 ﻿using Garage.Web.Models;
+using Garage.Web.ViewModels.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
 namespace Garage.Web.ViewModels
 {
-	public class CreateParkVehicleViewModel
+	public class CreateParkVehicleViewModel : IVehicleFormModel
 	{
 		[Required]
 		[Display(Name = "Vehicle Type")]
 		public VehicleType VehicleType { get; set; }
 
 		[Required(ErrorMessage = "Registration number is required.")]
-		[RegularExpression(@"^[A-Za-z0-9]{2,10}$",
-		 ErrorMessage = "2–10 letters or digits, no special characters.")]
+		[RegularExpression(@"^[A-Za-z0-9]{5,60}$",
+		 ErrorMessage = "5–60 letters or digits, no special characters.")]
 		[Display(Name = "Registration Number")]
-		public string RegistrationNumber { get; set; } = string.Empty;
+		public required string RegistrationNumber { get; set; }
 
 		[Required]
 		[StringLength(20, MinimumLength = 2)]
-		public string Color { get; set; } = string.Empty;
+		public required string Color { get; set; }
 
 		[Required]
 		public BrandType Brand { get; set; }
 
 		[Required]
 		[StringLength(50, MinimumLength = 1)]
-		public string Model { get; set; } = string.Empty;
+		public required string Model { get; set; }
 
 		[Required]
 		[Range(1, 16)]

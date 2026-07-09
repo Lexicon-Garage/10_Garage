@@ -16,14 +16,14 @@ namespace Garage.Web.Models
 
         [Required]
         [StringLength(20, MinimumLength = 2)]
-        public string? Color { get; set; }
+		public required string Color { get; set; }
 
-        [Range(1, 16)]
+		[Range(1, 16)]
         public required int NumberOfWheels { get; set; }
 
         [Required]
         [StringLength(50, MinimumLength = 1)]
-        public string? Model { get; set; }
+        public required string Model { get; set; }
 
         [EnumDataType(typeof(BrandType))]
         public required BrandType BrandType { get; set; }
