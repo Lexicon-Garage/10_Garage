@@ -11,7 +11,7 @@ namespace Garage.Web.ViewModels
 		public VehicleType VehicleType { get; set; }
 
 		[Required(ErrorMessage = "Registration number is required.")]
-		[RegularExpression(@"^[A-Za-z0-9]{2,60}$",
+		[RegularExpression(@"^[A-Za-z0-9]{5,60}$",
 		 ErrorMessage = "5–60 letters or digits, no special characters.")]
 		[Display(Name = "Registration Number")]
 		public required string RegistrationNumber { get; set; }
