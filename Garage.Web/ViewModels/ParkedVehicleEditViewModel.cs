@@ -1,18 +1,19 @@
 ﻿using Garage.Web.Models;
+using Garage.Web.ViewModels.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace Garage.Web.ViewModels
 {
-    public class ParkedVehicleEditViewModel
-    {
+    public class ParkedVehicleEditViewModel : IVehicleFormModel
+	{
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Registration number is required.")]
         [RegularExpression(@"^[A-Za-z0-9]{2,10}$",
          ErrorMessage = "2–10 letters or digits, no special characters.")]
         [Display(Name = "Registration Number")]
-        public string RegistrationNumber { get; set; } = string.Empty;
+        public required string RegistrationNumber { get; set; }
 
         [EnumDataType(typeof(VehicleType))]
         [Display(Name = "Vehicle Type")]
@@ -21,18 +22,18 @@ namespace Garage.Web.ViewModels
         [Required]
         [StringLength(20, MinimumLength = 2)]
         [Display(Name = "Color")]
-        public string? Color { get; set; }
+        public required string Color { get; set; }
 
-        [Range(1, 16)]
+		[Range(1, 16)]
         [Display(Name = "Number of wheels")]
         public int NumberOfWheels { get; set; }
 
         [Required]
         [StringLength(50, MinimumLength = 1)]
         [Display(Name = "Model")]
-        public string? Model { get; set; }
+        public required string Model { get; set; }
 
-        [EnumDataType(typeof(BrandType))]
+		[EnumDataType(typeof(BrandType))]
         [Display(Name = "Brand")]
         public BrandType BrandType { get; set; }
 
