@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Drawing;
 
 namespace Garage.Web.Models
@@ -30,5 +31,26 @@ namespace Garage.Web.Models
             
         [DataType(DataType.DateTime)]
         public required DateTime ArrivedTime { get; init; }
+
+        public ICollection<ParkingAllocation> ParkingAllocations { get; set; } = new List<ParkingAllocation>();
+
+        [NotMapped]
+        public int SpaceRequired => VehicleType switch
+        {
+            VehicleType.Bicycle => 3,
+
+            VehicleType.Motorcycle => 5,
+
+            VehicleType.Car => 15,
+
+            VehicleType.Boat => 30,
+
+            VehicleType.Bus => 45,
+
+            VehicleType.Airplane => 45,
+
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
     }
 }

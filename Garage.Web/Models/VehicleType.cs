@@ -5,6 +5,8 @@
         Car,
         Bus,
         Boat,
-
+        Airplane,
+        Motorcycle,
+        Bicycle
     }
 }
