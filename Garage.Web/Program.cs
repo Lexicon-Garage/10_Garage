@@ -20,7 +20,8 @@ namespace Garage.Web
             options.UseSqlServer(
             builder.Configuration.GetConnectionString("DefaultConnection")));
 			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
-            var app = builder.Build();
+				
+			var app = builder.Build();
 			
 			using (var scope = app.Services.CreateScope())
 			{
