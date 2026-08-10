@@ -77,7 +77,7 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
             VehicleTypeId = 1,
             RegistrationNumber = " abc123 ",
             Color = " Red ",
-            Brand = " Volkswagen ",
+            BrandTypeId = 1,
             Model = " Golf ",
             WheelsCount = 4
         };
@@ -121,6 +121,9 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
         context.VehicleTypes.Add(
             _factory.CreateVehicleType());
 
+        context.BrandTypes.Add(
+            _factory.CreateBrandType());
+
         context.Vehicles.Add(
             _factory.CreateVehicle(
                 1,
@@ -138,7 +141,7 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
             VehicleTypeId = 1,
             RegistrationNumber = " abc123 ",
             Color = "Red",
-            Brand = "Volvo",
+            BrandTypeId = 1,
             Model = "XC60",
             WheelsCount = 4
         };
@@ -148,7 +151,7 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
         Assert.IsType<ViewResult>(result);
 
         Assert.Equal(
-            "A vehicle with this registration number is already parked in the garage.",
+            "A vehicle with this registration number is already exists.",
             controller.ModelState["RegistrationNumber"]!
                 .Errors
                 .Single()
@@ -193,7 +196,7 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
             VehicleTypeId = 1,
             RegistrationNumber = "ABC123",
             Color = "Red",
-            Brand = "Volvo",
+            BrandTypeId = 1,
             Model = "XC60",
             WheelsCount = 4
         };
@@ -233,8 +236,8 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
             VehicleTypeId = 1,
             RegistrationNumber = "ABC123",
             Color = "Red",
-            Brand = "Volvo",
-            Model = "XC60",
+            BrandTypeId = 1,
+            Model = "XC60", 
             WheelsCount = 4
         };
 

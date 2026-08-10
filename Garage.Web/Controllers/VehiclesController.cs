@@ -100,7 +100,7 @@ public class VehiclesController : Controller
 			Color = vehicle.Color,
 			NumberOfWheels = vehicle.NumberOfWheels,
 			Model = vehicle.Model,
-			Brand = vehicle.Brand,
+			Brand = vehicle.BrandType.Name,
 			//ArrivedTime = vehicle.ArrivedTime
 		};
 
@@ -151,7 +151,7 @@ public class VehiclesController : Controller
 		.AnyAsync(v => v.RegistrationNumber == viewModel.RegistrationNumber);
 
 		if (isAlreadyParked)
-			ModelState.AddModelError("RegistrationNumber", "A vehicle with this registration number is already parked in the garage.");
+			ModelState.AddModelError("RegistrationNumber", "A vehicle with this registration number is already exists.");
 		
         var userId = _userManager.GetUserId(User);
         if (userId == null)
@@ -168,7 +168,7 @@ public class VehiclesController : Controller
 					VehicleTypeId = viewModel.VehicleTypeId,
 					RegistrationNumber = viewModel.RegistrationNumber,
 					Color = viewModel.Color,
-					Brand = viewModel.Brand,
+					BrandTypeId = viewModel.BrandTypeId,
 					Model = viewModel.Model,
 					NumberOfWheels = viewModel.WheelsCount,
                     OwnerId = userId
@@ -223,7 +223,7 @@ public class VehiclesController : Controller
 			Color = vehicle.Color,
 			NumberOfWheels = vehicle.NumberOfWheels,
 			Model = vehicle.Model,
-			Brand = vehicle.Brand,
+			BrandTypeId = vehicle.BrandTypeId,
             VehicleTypeId = vehicle.VehicleTypeId,
             //ArrivedTime = vehicle.ArrivedTime,
             //BrandTypes = EnumHelper.ToSelectList<BrandType>(),
@@ -238,23 +238,23 @@ public class VehiclesController : Controller
 	// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 	[HttpPost]
 	[ValidateAntiForgeryToken]
-	public async Task<IActionResult> Edit(int? id, VehicleEditViewModel parkedViewvehicle)
+	public async Task<IActionResult> Edit(int? id, VehicleEditViewModel vehicleEditViewModel)
 	{
 		if (!ModelState.IsValid)
 		{
-            parkedViewvehicle.VehicleTypes = await _context.VehicleTypes
+            vehicleEditViewModel.VehicleTypes = await _context.VehicleTypes
             .Select(v => new SelectListItem
             {
                 Value = v.Id.ToString(),
                 Text = v.Name,
-                Selected = v.Id == parkedViewvehicle.VehicleTypeId
+                Selected = v.Id == vehicleEditViewModel.VehicleTypeId
             })
             .ToListAsync();
 
-            return View(parkedViewvehicle);
+            return View(vehicleEditViewModel);
 		}
 
-		NormalizeInput(parkedViewvehicle);
+		NormalizeInput(vehicleEditViewModel);
 
         if (id == null)
         {
@@ -270,32 +270,32 @@ public class VehiclesController : Controller
 
 
 		bool exists = _context.Vehicles.Any(v =>
-			v.RegistrationNumber == parkedViewvehicle.RegistrationNumber && v.Id != id.Value);
+			v.RegistrationNumber == vehicleEditViewModel.RegistrationNumber && v.Id != id.Value);
 
 		if (exists)
 		{
 			ModelState.AddModelError("RegistrationNumber",
-				$"A vehicle with registration number {parkedViewvehicle.RegistrationNumber} is already parked.");
-			parkedViewvehicle.Brand = vehicle.Brand;
-			parkedViewvehicle.VehicleTypes = await _context.VehicleTypes
+				$"A vehicle with registration number {vehicleEditViewModel.RegistrationNumber} is already exists.");
+			vehicleEditViewModel.BrandTypeId = vehicle.BrandTypeId;
+			vehicleEditViewModel.VehicleTypes = await _context.VehicleTypes
 			.Select(v => new SelectListItem
 			{
 				Value = v.Id.ToString(),
 				Text = v.Name,
-				Selected = v.Id == parkedViewvehicle.VehicleTypeId
+				Selected = v.Id == vehicleEditViewModel.VehicleTypeId
 			})
 			.ToListAsync();
-            //parkedViewvehicle.VehicleTypes = EnumHelper.ToSelectList<VehicleType>();
-            return View(parkedViewvehicle);
+            //vehicleEditViewModel.VehicleTypes = EnumHelper.ToSelectList<VehicleType>();
+            return View(vehicleEditViewModel);
 		}
 		try
 		{
-			vehicle.RegistrationNumber = parkedViewvehicle.RegistrationNumber;
-			vehicle.VehicleTypeId = parkedViewvehicle.VehicleTypeId;
-			vehicle.Color = parkedViewvehicle.Color;
-			vehicle.NumberOfWheels = parkedViewvehicle.NumberOfWheels;
-			vehicle.Model = parkedViewvehicle.Model;
-			vehicle.Brand = parkedViewvehicle.Brand;
+			vehicle.RegistrationNumber = vehicleEditViewModel.RegistrationNumber;
+			vehicle.VehicleTypeId = vehicleEditViewModel.VehicleTypeId;
+			vehicle.Color = vehicleEditViewModel.Color;
+			vehicle.NumberOfWheels = vehicleEditViewModel.NumberOfWheels;
+			vehicle.Model = vehicleEditViewModel.Model;
+			vehicle.BrandTypeId = vehicleEditViewModel.BrandTypeId;
 
             await _context.SaveChangesAsync(); 
 			TempData["ValidationMessage"] = "The vehicle has been updated successfully.";

@@ -28,15 +28,16 @@ namespace Garage.Web.ViewModels
         [Display(Name = "Model")]
         public required string Model { get; set; }
 
-        [StringLength(50, MinimumLength = 1)]
-        [Display(Name = "Brand")]
-        public string Brand { get; set; }= string.Empty;
-
         [Required]
         [Display(Name = "Vehicle Type")]
         public int VehicleTypeId { get; set; }
-
         public IEnumerable<SelectListItem> VehicleTypes { get; set; } = Enumerable.Empty<SelectListItem>();
+
+        [Required]
+        [Display(Name = "Brand Type")]
+        public int BrandTypeId { get; set; }
+        public IEnumerable<SelectListItem> BrandTypes { get; set; } = Enumerable.Empty<SelectListItem>();
+
     }
 
 }

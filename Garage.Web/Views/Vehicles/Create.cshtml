@@ -58,7 +58,15 @@
                                     <option value="">-- Select Vehicle Type --</option>
                                 </select>
                             }
-
+                        @* BrandType dropdown *@
+                        @if (property.PropertyName == nameof(Model.BrandTypeId))
+                        {
+                            <select asp-for="BrandTypeId"
+                                    asp-items="Model.BrandTypes"
+                                    class="form-select">
+                                <option value="">-- Select Brand Type --</option>
+                            </select>
+                        }
 
                             @* Integer fields except VehicleTypeId *@
                             else if (property.ModelType == typeof(int))

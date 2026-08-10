@@ -15,10 +15,6 @@ namespace Garage.Web.Models
 
         [Required]
         [StringLength(50)]
-        public required string Brand { get; set; }
-
-        [Required]
-        [StringLength(50)]
         public required string Model { get; set; }
 
         [Required]
@@ -33,7 +29,12 @@ namespace Garage.Web.Models
 
         public VehicleType VehicleType { get; set; } = default!;
 
-       [Required]
+        [Required]
+        public int BrandTypeId { get; set; }
+
+        public BrandType BrandType { get; set; } = default!;
+
+        [Required]
         public string OwnerId { get; set; } = default!;
 
         public IdentityUser Owner { get; set; } = default!;

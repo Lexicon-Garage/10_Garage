@@ -261,7 +261,7 @@ public class VehiclesControllerEditTests: IClassFixture<ControllerTestFixture>
                 VehicleTypeId = 1,
                 Color = "Blue",
                 Model = "Golf",
-                Brand = "VW",
+                BrandTypeId = 1,
                 NumberOfWheels = 4
             };
 
@@ -313,7 +313,7 @@ public class VehiclesControllerEditTests: IClassFixture<ControllerTestFixture>
                 VehicleTypeId = 1,
                 Color = " Blue ",
                 Model = " Passat ",
-                Brand = " VW ",
+                BrandTypeId = 1,
                 NumberOfWheels = 4
             };
 

@@ -1,16 +1,8 @@
 ﻿namespace Garage.Web.Models
 {
-    public enum BrandType
+    public class BrandType
     {
-        Toyota,
-        Honda,
-        Ford,
-        Chevrolet,
-        Nissan,
-        Hyundai,
-        Kia,
-        Volkswagen,
-        BMW,
-        MercedesBenz,
+        public int Id { get; set; }
+        public string Name { get; set; } = default!;
     }
 }

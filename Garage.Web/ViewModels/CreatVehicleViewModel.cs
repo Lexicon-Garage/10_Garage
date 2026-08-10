@@ -16,10 +16,6 @@ namespace Garage.Web.ViewModels
 		[StringLength(20, MinimumLength = 2)]
 		public string Color { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(50, MinimumLength = 1)]
-        public string Brand { get; set; }= string.Empty;
-
 		[Required]
 		[StringLength(50, MinimumLength = 1)]
 		public string Model { get; set; } = string.Empty;
@@ -34,5 +30,11 @@ namespace Garage.Web.ViewModels
         public int VehicleTypeId { get; set; }
 
         public IEnumerable<SelectListItem> VehicleTypes { get; set; }= Enumerable.Empty<SelectListItem>();
+
+        [Required]
+        [Display(Name = "Brand Type")]
+        public int BrandTypeId { get; set; }
+
+        public IEnumerable<SelectListItem> BrandTypes { get; set; } = Enumerable.Empty<SelectListItem>();
     }
 }

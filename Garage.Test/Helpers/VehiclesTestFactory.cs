@@ -63,12 +63,20 @@ public class VehiclesTestFactory
             Name = name
         };
     }
-
+    public BrandType CreateBrandType(int id = 1, string name = "Volkswagen")
+    {
+        return new BrandType
+        {
+            Id = id,
+            Name = name
+        };
+    }
     public Vehicle CreateVehicle(
         int id,
         string registrationNumber,
         string ownerId,
         int vehicleTypeId = 1,
+        int brandTypeId = 1,
         string color = "Red",
         string model = "Golf",
         string brand = "Volkswagen",
@@ -83,7 +91,7 @@ public class VehiclesTestFactory
             VehicleTypeId = vehicleTypeId,
             Color = color,
             Model = model,
-            Brand = brand,
+            BrandTypeId = brandTypeId,
             NumberOfWheels = wheels
         };
     }
@@ -94,6 +102,8 @@ public class VehiclesTestFactory
 
         context.VehicleTypes.Add(
             CreateVehicleType());
+        context.BrandTypes.Add(
+            CreateBrandType());
 
         context.Vehicles.AddRange(vehicles);
 

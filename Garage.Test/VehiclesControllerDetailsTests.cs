@@ -79,6 +79,10 @@ public class VehiclesControllerDetailsTests: IClassFixture<ControllerTestFixture
             _factory.CreateVehicleType(
                 1,
                 "Car"));
+        context.BrandTypes.Add(
+           _factory.CreateBrandType(
+               1,
+               "Volkswagen"));
 
         context.Vehicles.Add(
             _factory.CreateVehicle(

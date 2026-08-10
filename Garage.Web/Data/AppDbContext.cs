@@ -17,5 +17,9 @@ namespace Garage.Web.Data
         {
             get; set;
         }
+        public DbSet<BrandType> BrandTypes
+        {
+            get; set;
+        }
     }
 }
