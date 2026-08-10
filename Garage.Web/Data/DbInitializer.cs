@@ -1,32 +1,69 @@
 using Garage.Web.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Garage.Web.Data
 {
     public static class DbInitializer
     {
-        public static void Seed(AppDbConext context)
+        public static async Task SeedAsync(
+            AppDbConext context,
+            UserManager<ApplicationUser> userManager)
         {
+            // Apply pending migrations
+            await context.Database.MigrateAsync();
+
+            // -------------------------
+            // Seed user
+            // -------------------------
+
+            const string email = "admin@garage.se";
+            const string password = "Admin123!";
+
+            var existingUser = await userManager.FindByEmailAsync(email);
+
+            if (existingUser == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = email,
+                    Email = email,
+                    EmailConfirmed = true,
+
+                    FirstName = "Admin",
+                    LastName = "Garage",
+
+                    PersonalNumber = "19900101-1234",
+
+                    ProMembershipStart = DateTime.Now,
+                    ProMembershipEnd = DateTime.Now.AddYears(1)
+                };
+
+                var result = await userManager.CreateAsync(user, password);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(
+                        ", ",
+                        result.Errors.Select(e => e.Description));
+
+                    throw new Exception(
+                        $"Failed to create seed user: {errors}");
+                }
+            }
+
+            // -------------------------
+            // Seed vehicles
+            // -------------------------
+
             if (context.Vehicles.Any())
-                return; // never overwrite real data
+                return;
 
             var now = DateTime.Now;
 
-            //var vehicles = new List<ParkedVehicle>
-            //{
-            //    new() { RegistrationNumber = "ABC123", VehicleType = VehicleType.Car,  Color = "Red",    Model = "Corolla", NumberOfWheels = 4, BrandType = BrandType.Toyota,       ArrivedTime = now.AddDays(-2).AddHours(-3) },
-            //    new() { RegistrationNumber = "DEF456", VehicleType = VehicleType.Car,  Color = "Blue",   Model = "Civic",   NumberOfWheels = 4, BrandType = BrandType.Honda,        ArrivedTime = now.AddDays(-1).AddHours(-5) },
-            //    new() { RegistrationNumber = "GHI789", VehicleType = VehicleType.Car,  Color = "Black",  Model = "Focus",   NumberOfWheels = 4, BrandType = BrandType.Ford,         ArrivedTime = now.AddHours(-26) },
-            //    new() { RegistrationNumber = "JKL012", VehicleType = VehicleType.Car,  Color = "White",  Model = "Golf",    NumberOfWheels = 4, BrandType = BrandType.Volkswagen,   ArrivedTime = now.AddHours(-8) },
-            //    new() { RegistrationNumber = "MNO345", VehicleType = VehicleType.Car,  Color = "Silver", Model = "X5",      NumberOfWheels = 4, BrandType = BrandType.BMW,          ArrivedTime = now.AddHours(-4).AddMinutes(-30) },
-            //    new() { RegistrationNumber = "PQR678", VehicleType = VehicleType.Bus,  Color = "Yellow", Model = "Sprinter",NumberOfWheels = 6, BrandType = BrandType.MercedesBenz, ArrivedTime = now.AddHours(-3) },
-            //    new() { RegistrationNumber = "STU901", VehicleType = VehicleType.Bus,  Color = "Green",  Model = "Transit", NumberOfWheels = 6, BrandType = BrandType.Ford,         ArrivedTime = now.AddHours(-2).AddMinutes(-15) },
-            //    new() { RegistrationNumber = "VWX234", VehicleType = VehicleType.Boat, Color = "White",  Model = "Nautica", NumberOfWheels = 2, BrandType = BrandType.Nissan,       ArrivedTime = now.AddMinutes(-90) },
-            //    new() { RegistrationNumber = "YZA567", VehicleType = VehicleType.Car,  Color = "Gray",   Model = "Elantra", NumberOfWheels = 4, BrandType = BrandType.Hyundai,      ArrivedTime = now.AddMinutes(-45) },
-            //    new() { RegistrationNumber = "BCD890", VehicleType = VehicleType.Car,  Color = "Orange", Model = "Sportage",NumberOfWheels = 4, BrandType = BrandType.Kia,          ArrivedTime = now.AddMinutes(-10) },
-            //};
+            // Add vehicles here if needed
 
-            //context.Vehicles.AddRange(vehicles);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
     }
 }

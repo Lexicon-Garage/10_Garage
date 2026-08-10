@@ -106,7 +106,7 @@ namespace Garage.Web.Areas.Identity.Pages.Account
 
             [Required]
             [Display(Name = "Personal identity number")]
-            public string PersonalIdentityNumber { get; set; }
+            public string PersonalNumber { get; set; }
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -135,7 +135,7 @@ namespace Garage.Web.Areas.Identity.Pages.Account
 
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
-                user.PersonalIdentityNumber = Input.PersonalIdentityNumber;
+                user.PersonalNumber = Input.PersonalIdentityNumber;
 
                 await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);

@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Garage.Web.Data
-
 {
     public class AppDbConext : IdentityDbContext<ApplicationUser>
     {
@@ -11,10 +10,7 @@ namespace Garage.Web.Data
         : base(options)
         {
         }
-        public DbSet<Vehicle> Vehicles
-        {
-            get; set;
-        }
+        public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<VehicleType> VehicleTypes
         {
             get; set;
@@ -23,6 +19,9 @@ namespace Garage.Web.Data
         {
             get; set;
         }
+        public DbSet<ParkingSession> ParkingSessions { get; set; }
+        public DbSet<ParkingSpot> ParkingSpots { get; set; }
+        public DbSet<ParkingAllocation> ParkingAllocations { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

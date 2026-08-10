@@ -110,7 +110,7 @@ public class VehiclesController : Controller
     // GET: Vehicles/Create
     public async Task<IActionResult> Create()
     {
-        var vm = new CreateParkVehicleViewModel
+        var vm = new CreateVehicleViewModel
 
         {
             VehicleTypes = await _context.VehicleTypes
@@ -151,7 +151,7 @@ public class VehiclesController : Controller
 	// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 	[HttpPost]
 	[ValidateAntiForgeryToken]
-	public async Task<IActionResult> Create(CreateParkVehicleViewModel viewModel)
+	public async Task<IActionResult> Create(CreateVehicleViewModel viewModel)
 	{
 		NormalizeInput(viewModel);
 

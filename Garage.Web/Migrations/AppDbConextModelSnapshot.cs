@@ -31,10 +31,12 @@ namespace Garage.Web.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
@@ -56,10 +58,12 @@ namespace Garage.Web.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("NormalizedEmail")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedUserName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
@@ -88,14 +92,23 @@ namespace Garage.Web.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.HasIndex("PersonalNumber")
                         .IsUnique();
 
-                    b.ToTable("ApplicationUser");
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("Garage.Web.Models.BrandType", b =>
@@ -131,7 +144,7 @@ namespace Garage.Web.Migrations
 
                     b.HasIndex("ParkingSpotId");
 
-                    b.ToTable("ParkingAllocation");
+                    b.ToTable("ParkingAllocations");
                 });
 
             modelBuilder.Entity("Garage.Web.Models.ParkingSession", b =>
@@ -161,7 +174,7 @@ namespace Garage.Web.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("ParkingSession");
+                    b.ToTable("ParkingSessions");
                 });
 
             modelBuilder.Entity("Garage.Web.Models.ParkingSpot", b =>
@@ -195,7 +208,7 @@ namespace Garage.Web.Migrations
 
                     b.HasIndex("VehicleTypeId");
 
-                    b.ToTable("ParkingSpot");
+                    b.ToTable("ParkingSpots");
                 });
 
             modelBuilder.Entity("Garage.Web.Models.Vehicle", b =>
@@ -267,106 +280,6 @@ namespace Garage.Web.Migrations
                         .IsUnique();
 
                     b.ToTable("VehicleTypes");
-                });
-
-            modelBuilder.Entity("Garage.Web.Models.ParkingAllocation", b =>
-                {
-                    b.HasOne("Garage.Web.Models.ParkingSession", "ParkingSession")
-                        .WithMany("ParkingAllocations")
-                        .HasForeignKey("ParkingSessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Garage.Web.Models.ParkingSpot", "ParkingSpot")
-                        .WithMany("ParkingAllocations")
-                        .HasForeignKey("ParkingSpotId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("ParkingSession");
-
-                    b.Navigation("ParkingSpot");
-                });
-
-            modelBuilder.Entity("Garage.Web.Models.ParkingSession", b =>
-                {
-                    b.HasOne("Garage.Web.Models.Vehicle", "Vehicle")
-                        .WithMany("ParkingSessions")
-                        .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Vehicle");
-                });
-
-            modelBuilder.Entity("Garage.Web.Models.ParkingSpot", b =>
-                {
-                    b.HasOne("Garage.Web.Models.VehicleType", "VehicleType")
-                        .WithMany("ParkingSpots")
-                        .HasForeignKey("VehicleTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("VehicleType");
-                });
-
-            modelBuilder.Entity("Garage.Web.Models.Vehicle", b =>
-                {
-                    b.HasOne("Garage.Web.Models.BrandType", "BrandType")
-                        .WithMany("Vehicles")
-                        .HasForeignKey("BrandTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Garage.Web.Models.ApplicationUser", "Owner")
-                        .WithMany("Vehicles")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Garage.Web.Models.VehicleType", "VehicleType")
-                        .WithMany("Vehicles")
-                        .HasForeignKey("VehicleTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BrandType");
-
-                    b.Navigation("Owner");
-
-                    b.Navigation("VehicleType");
-                });
-
-            modelBuilder.Entity("Garage.Web.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("Vehicles");
-                });
-
-            modelBuilder.Entity("Garage.Web.Models.BrandType", b =>
-                {
-                    b.Navigation("Vehicles");
-                });
-
-            modelBuilder.Entity("Garage.Web.Models.ParkingSession", b =>
-                {
-                    b.Navigation("ParkingAllocations");
-                });
-
-            modelBuilder.Entity("Garage.Web.Models.ParkingSpot", b =>
-                {
-                    b.Navigation("ParkingAllocations");
-                });
-
-            modelBuilder.Entity("Garage.Web.Models.Vehicle", b =>
-                {
-                    b.Navigation("ParkingSessions");
-                });
-
-            modelBuilder.Entity("Garage.Web.Models.VehicleType", b =>
-                {
-                    b.Navigation("ParkingSpots");
-
-                    b.Navigation("Vehicles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -506,6 +419,74 @@ namespace Garage.Web.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Garage.Web.Models.ParkingAllocation", b =>
+                {
+                    b.HasOne("Garage.Web.Models.ParkingSession", "ParkingSession")
+                        .WithMany("ParkingAllocations")
+                        .HasForeignKey("ParkingSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Garage.Web.Models.ParkingSpot", "ParkingSpot")
+                        .WithMany("ParkingAllocations")
+                        .HasForeignKey("ParkingSpotId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ParkingSession");
+
+                    b.Navigation("ParkingSpot");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ParkingSession", b =>
+                {
+                    b.HasOne("Garage.Web.Models.Vehicle", "Vehicle")
+                        .WithMany("ParkingSessions")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ParkingSpot", b =>
+                {
+                    b.HasOne("Garage.Web.Models.VehicleType", "VehicleType")
+                        .WithMany("ParkingSpots")
+                        .HasForeignKey("VehicleTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("VehicleType");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.Vehicle", b =>
+                {
+                    b.HasOne("Garage.Web.Models.BrandType", "BrandType")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("BrandTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Garage.Web.Models.ApplicationUser", "Owner")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Garage.Web.Models.VehicleType", "VehicleType")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("VehicleTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BrandType");
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("VehicleType");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -555,6 +536,38 @@ namespace Garage.Web.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.BrandType", b =>
+                {
+                    b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ParkingSession", b =>
+                {
+                    b.Navigation("ParkingAllocations");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ParkingSpot", b =>
+                {
+                    b.Navigation("ParkingAllocations");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.Vehicle", b =>
+                {
+                    b.Navigation("ParkingSessions");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.VehicleType", b =>
+                {
+                    b.Navigation("ParkingSpots");
+
+                    b.Navigation("Vehicles");
                 });
 #pragma warning restore 612, 618
         }

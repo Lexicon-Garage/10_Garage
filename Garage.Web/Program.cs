@@ -3,15 +3,15 @@ using Garage.Web.Services;
 using Garage.Web.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
-using Microsoft.AspNetCore.Identity;
 using Garage.Web.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Garage.Web
 {
 	public class Program
 	{
-		public static void Main(string[] args)
-		{
+        public static async Task Main(string[] args)
+        {
             var builder = WebApplication.CreateBuilder(args);
 
             QuestPDF.Settings.License = LicenseType.Community;
@@ -22,6 +22,8 @@ namespace Garage.Web
             options.UseSqlServer(
             builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<GarageWebContext>();
+
             
             
             builder.Services
@@ -30,15 +32,19 @@ namespace Garage.Web
 	            .AddEntityFrameworkStores<AppDbConext>();
 			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
             var app = builder.Build();
-			
-			using (var scope = app.Services.CreateScope())
-			{
-    			var context = scope.ServiceProvider.GetRequiredService<AppDbConext>();
-    			DbInitializer.Seed(context);
-			}
-			
-			// Configure the HTTP request pipeline.
-			if (!app.Environment.IsDevelopment())
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+
+                var context = services.GetRequiredService<AppDbConext>();
+                var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+
+                await DbInitializer.SeedAsync(context, userManager);
+            }
+
+            // Configure the HTTP request pipeline.
+            if (!app.Environment.IsDevelopment())
 			{
 				app.UseExceptionHandler("/Home/Error");
 				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.

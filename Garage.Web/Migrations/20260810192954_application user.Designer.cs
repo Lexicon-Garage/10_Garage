@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Garage.Web.Migrations
 {
     [DbContext(typeof(AppDbConext))]
-    [Migration("20260810133053_AddApplicationUserFields")]
-    partial class AddApplicationUserFields
+    [Migration("20260810192954_application user")]
+    partial class applicationuser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,15 +71,22 @@ namespace Garage.Web.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PersonalIdentityNumber")
+                    b.Property<string>("PersonalNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime>("ProMembershipEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ProMembershipStart")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -101,10 +108,13 @@ namespace Garage.Web.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
+                    b.HasIndex("PersonalNumber")
+                        .IsUnique();
+
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Garage.Web.Models.ParkedVehicle", b =>
+            modelBuilder.Entity("Garage.Web.Models.BrandType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -112,10 +122,107 @@ namespace Garage.Web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("ArrivedTime")
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("BrandTypes");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ParkingAllocation", b =>
+                {
+                    b.Property<int>("ParkingSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ParkingSpotId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ParkingSessionId", "ParkingSpotId");
+
+                    b.HasIndex("ParkingSpotId");
+
+                    b.ToTable("ParkingAllocations");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ParkingSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CheckInTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("BrandType")
+                    b.Property<DateTime?>("CheckOutTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("HourlyRateAtCheckIn")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("ParkingSessions");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ParkingSpot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsOutOfService")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("SpotNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("VehicleTypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SpotNumber")
+                        .IsUnique();
+
+                    b.HasIndex("VehicleTypeId");
+
+                    b.ToTable("ParkingSpots");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.Vehicle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BrandTypeId")
                         .HasColumnType("int");
 
                     b.Property<string>("Color")
@@ -131,17 +238,51 @@ namespace Garage.Web.Migrations
                     b.Property<int>("NumberOfWheels")
                         .HasColumnType("int");
 
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("RegistrationNumber")
                         .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
-                    b.Property<int>("VehicleType")
+                    b.Property<int>("VehicleTypeId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ParkedVehicles");
+                    b.HasIndex("BrandTypeId");
+
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("RegistrationNumber")
+                        .IsUnique();
+
+                    b.HasIndex("VehicleTypeId");
+
+                    b.ToTable("Vehicles");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.VehicleType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("VehicleTypes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -281,6 +422,74 @@ namespace Garage.Web.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Garage.Web.Models.ParkingAllocation", b =>
+                {
+                    b.HasOne("Garage.Web.Models.ParkingSession", "ParkingSession")
+                        .WithMany("ParkingAllocations")
+                        .HasForeignKey("ParkingSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Garage.Web.Models.ParkingSpot", "ParkingSpot")
+                        .WithMany("ParkingAllocations")
+                        .HasForeignKey("ParkingSpotId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ParkingSession");
+
+                    b.Navigation("ParkingSpot");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ParkingSession", b =>
+                {
+                    b.HasOne("Garage.Web.Models.Vehicle", "Vehicle")
+                        .WithMany("ParkingSessions")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ParkingSpot", b =>
+                {
+                    b.HasOne("Garage.Web.Models.VehicleType", "VehicleType")
+                        .WithMany("ParkingSpots")
+                        .HasForeignKey("VehicleTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("VehicleType");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.Vehicle", b =>
+                {
+                    b.HasOne("Garage.Web.Models.BrandType", "BrandType")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("BrandTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Garage.Web.Models.ApplicationUser", "Owner")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Garage.Web.Models.VehicleType", "VehicleType")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("VehicleTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BrandType");
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("VehicleType");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -330,6 +539,38 @@ namespace Garage.Web.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.BrandType", b =>
+                {
+                    b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ParkingSession", b =>
+                {
+                    b.Navigation("ParkingAllocations");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.ParkingSpot", b =>
+                {
+                    b.Navigation("ParkingAllocations");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.Vehicle", b =>
+                {
+                    b.Navigation("ParkingSessions");
+                });
+
+            modelBuilder.Entity("Garage.Web.Models.VehicleType", b =>
+                {
+                    b.Navigation("ParkingSpots");
+
+                    b.Navigation("Vehicles");
                 });
 #pragma warning restore 612, 618
         }

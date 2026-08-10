@@ -40,7 +40,7 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
 
         var viewResult = Assert.IsType<ViewResult>(result);
 
-        var model = Assert.IsType<CreateParkVehicleViewModel>(
+        var model = Assert.IsType<CreateVehicleViewModel>(
             viewResult.Model);
 
         Assert.Equal(
@@ -72,7 +72,7 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
             context,
             "user-1");
 
-        var model = new CreateParkVehicleViewModel
+        var model = new CreateVehicleViewModel
         {
             VehicleTypeId = 1,
             RegistrationNumber = " abc123 ",
@@ -136,7 +136,7 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
             context,
             "user-1");
 
-        var model = new CreateParkVehicleViewModel
+        var model = new CreateVehicleViewModel
         {
             VehicleTypeId = 1,
             RegistrationNumber = " abc123 ",
@@ -171,7 +171,7 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
             "RegistrationNumber",
             "Registration number is required.");
 
-        var model = new CreateParkVehicleViewModel
+        var model = new CreateVehicleViewModel
         {
             RegistrationNumber = "ABC123"
         };
@@ -191,7 +191,7 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
         var controller = _factory.CreateControllerWithoutUser(
             context);
 
-        var model = new CreateParkVehicleViewModel
+        var model = new CreateVehicleViewModel
         {
             VehicleTypeId = 1,
             RegistrationNumber = "ABC123",
@@ -231,7 +231,7 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
             context,
             "user-1");
 
-        var model = new CreateParkVehicleViewModel
+        var model = new CreateVehicleViewModel
         {
             VehicleTypeId = 1,
             RegistrationNumber = "ABC123",
