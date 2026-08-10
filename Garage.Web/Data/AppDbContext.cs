@@ -9,10 +9,13 @@ namespace Garage.Web.Data
         : base(options)
         {
         }
-        public DbSet<ParkedVehicle> ParkedVehicles 
+        public DbSet<Vehicle> Vehicles 
         {
             get; set;
         }
-
-}
+        public DbSet<VehicleType> VehicleTypes
+        {
+            get; set;
+        }
+    }
 }

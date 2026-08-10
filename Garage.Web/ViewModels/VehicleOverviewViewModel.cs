@@ -2,10 +2,10 @@ using Garage.Web.Models;
 
 namespace Garage.Web.ViewModels
 {
-    public class ParkedVehicleOverviewViewModel
+    public class VehicleOverviewViewModel
     {
         public int Id { get; set; }
-        public VehicleType VehicleType { get; set; }
+        public string VehicleType { get; set; }   = string.Empty;
         public string RegistrationNumber { get; set; } = string.Empty;
         public DateTime ArrivedTime { get; set; }
         public TimeSpan ParkedDuration => DateTime.Now - ArrivedTime;

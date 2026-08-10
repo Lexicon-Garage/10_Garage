@@ -1,11 +1,10 @@
-﻿using Garage.Web.Models;
-using Garage.Web.ViewModels.Interfaces;
+﻿using Garage.Web.ViewModels.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace Garage.Web.ViewModels
 {
-    public class ParkedVehicleEditViewModel : IVehicleFormModel
+    public class VehicleEditViewModel : IVehicleFormModel
 	{
         public int Id { get; set; }
 
@@ -14,10 +13,6 @@ namespace Garage.Web.ViewModels
          ErrorMessage = "5–60 letters or digits, no special characters.")]
         [Display(Name = "Registration Number")]
         public required string RegistrationNumber { get; set; }
-
-        [EnumDataType(typeof(VehicleType))]
-        [Display(Name = "Vehicle Type")]
-        public VehicleType VehicleType { get; set; }
 
         [Required]
         [StringLength(20, MinimumLength = 2)]
@@ -33,13 +28,15 @@ namespace Garage.Web.ViewModels
         [Display(Name = "Model")]
         public required string Model { get; set; }
 
-		[EnumDataType(typeof(BrandType))]
+        [StringLength(50, MinimumLength = 1)]
         [Display(Name = "Brand")]
-        public BrandType BrandType { get; set; }
+        public string Brand { get; set; }= string.Empty;
 
-        public DateTime ArrivedTime { get; set; }
-        public IEnumerable<SelectListItem> BrandTypes { get; set; } = Enumerable.Empty<SelectListItem>();
+        [Required]
+        [Display(Name = "Vehicle Type")]
+        public int VehicleTypeId { get; set; }
+
         public IEnumerable<SelectListItem> VehicleTypes { get; set; } = Enumerable.Empty<SelectListItem>();
-
     }
+
 }
