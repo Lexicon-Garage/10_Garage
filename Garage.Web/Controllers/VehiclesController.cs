@@ -44,15 +44,15 @@ public class VehiclesController : Controller
            v.RegistrationNumber.Contains(term) ||
            v.Color.Contains(term) ||
            v.Model.Contains(term) ||
-           v.VehicleType.Name.Contains(term));
+           v.VehicleType!.Name.Contains(term));
         }
 
 		// --- Sort ---
 		bool desc = sortDir == "desc";
 		query = sortColumn switch
 		{
-            "type" => desc ? query.OrderByDescending(v => v.VehicleType.Name)
-             : query.OrderBy(v => v.VehicleType.Name),
+            "type" => desc ? query.OrderByDescending(v => v.VehicleType!.Name)
+             : query.OrderBy(v => v.VehicleType!.Name),
             "reg" => desc ? query.OrderByDescending(v => v.RegistrationNumber)
 							  : query.OrderBy(v => v.RegistrationNumber),
             _ => query.OrderBy(v => v.Id)
@@ -66,7 +66,7 @@ public class VehiclesController : Controller
 			.Select(v => new VehicleOverviewViewModel
 			{
 				Id = v.Id,
-				VehicleType = v.VehicleType.Name,
+				VehicleType = v.VehicleType!.Name,
 				RegistrationNumber = v.RegistrationNumber,
 				//ArrivedTime = v.ArrivedTime
 			})
@@ -96,11 +96,11 @@ public class VehiclesController : Controller
 		{
 			Id = vehicle.Id,
 			RegistrationNumber = vehicle.RegistrationNumber,
-			VehicleType = vehicle.VehicleType.Name,
+			VehicleType = vehicle.VehicleType!.Name,
 			Color = vehicle.Color,
 			NumberOfWheels = vehicle.NumberOfWheels,
 			Model = vehicle.Model,
-			Brand = vehicle.BrandType.Name,
+			Brand = vehicle.BrandType!.Name,
 			//ArrivedTime = vehicle.ArrivedTime
 		};
 
@@ -346,7 +346,7 @@ public class VehiclesController : Controller
 			var receipt = new ReceiptViewModel
 			{
 				RegistrationNumber = vehicle.RegistrationNumber,
-				VehicleType = vehicle.VehicleType.Name,
+				VehicleType = vehicle.VehicleType!.Name,
 				//CheckInTime = vehicle.ArrivedTime,
 				CheckOutTime = DateTime.Now,
 

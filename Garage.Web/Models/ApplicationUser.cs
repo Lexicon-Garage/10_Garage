@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Garage.Web.Models
 {
 	[Index(nameof(PersonalNumber), IsUnique = true)]
-	public class ApplicationUser : IdentityUser
+	public class ApplicationUser : IdentityUser 
 	{
 		[Required]
 		[StringLength(50, MinimumLength = 1)]
