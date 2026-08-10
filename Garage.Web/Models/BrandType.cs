@@ -1,16 +1,17 @@
-﻿namespace Garage.Web.Models
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+
+namespace Garage.Web.Models
 {
-    public enum BrandType
-    {
-        Toyota,
-        Honda,
-        Ford,
-        Chevrolet,
-        Nissan,
-        Hyundai,
-        Kia,
-        Volkswagen,
-        BMW,
-        MercedesBenz,
-    }
+	[Index(nameof(Name), IsUnique = true)]
+	public class BrandType
+	{
+		public int Id { get; set; }
+
+		[Required]
+		[StringLength(50, MinimumLength = 1)]
+		public required string Name { get; set; }
+
+		public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
+	}
 }
