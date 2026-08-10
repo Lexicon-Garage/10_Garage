@@ -4,6 +4,8 @@ namespace Garage.Web.ViewModels
 {
     public class ReceiptViewModel
     {
+
+        //ToDo: ReceiptViewModel har hårdkodat timpris (5 kr)
         private const decimal HourlyRate = 5m;
         public string RegistrationNumber { get; set; } = string.Empty;
         public VehicleType VehicleType { get; set; }

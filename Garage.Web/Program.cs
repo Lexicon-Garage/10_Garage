@@ -1,3 +1,4 @@
+using Garage.Web.Configuration;
 using Garage.Web.Data;
 using Garage.Web.Services;
 using Garage.Web.ViewModels;
@@ -20,6 +21,13 @@ namespace Garage.Web
             options.UseSqlServer(
             builder.Configuration.GetConnectionString("DefaultConnection")));
 			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
+
+			builder.Services
+    			.AddOptions<PricingOptions>()
+    			.Bind(builder.Configuration.GetSection(PricingOptions.SectionName))
+    			.ValidateDataAnnotations()
+    			.ValidateOnStart();
+
             var app = builder.Build();
 			
 			using (var scope = app.Services.CreateScope())
