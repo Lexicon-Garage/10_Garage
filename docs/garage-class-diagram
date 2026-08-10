@@ -1,0 +1,21 @@
+classDiagram
+    direction TB
+
+    class ApplicationUser
+    class BrandType
+    class ParkingAllocation
+    class ParkingSession
+    class ParkingSpot
+    class Vehicle
+    class VehicleType
+
+    Vehicle --> BrandType : BrandType
+    Vehicle --> VehicleType : VehicleType
+    Vehicle --> ApplicationUser : Owner
+
+    ParkingSpot --> VehicleType : VehicleType
+
+    ParkingSession --> Vehicle : Vehicle
+
+    ParkingAllocation --> ParkingSpot : ParkingSpot
+    ParkingAllocation --> ParkingSession : ParkingSession
