@@ -3,6 +3,7 @@ using Garage.Web.Services;
 using Garage.Web.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
+using Microsoft.AspNetCore.Identity;
 
 namespace Garage.Web
 {
@@ -19,6 +20,9 @@ namespace Garage.Web
             builder.Services.AddDbContext<AppDbConext>(options =>
             options.UseSqlServer(
             builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services
+	            .AddDefaultIdentity<IdentityUser>()
+	            .AddEntityFrameworkStores<AppDbConext>();
 			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
             var app = builder.Build();
 			
@@ -38,7 +42,8 @@ namespace Garage.Web
 
 			app.UseHttpsRedirection();
 			app.UseRouting();
-
+			
+			app.UseAuthentication();
 			app.UseAuthorization();
 
 			app.MapStaticAssets();
@@ -46,7 +51,7 @@ namespace Garage.Web
 				name: "default",
 				pattern: "{controller=ParkedVehicles}/{action=Index}/{id?}")
 				.WithStaticAssets();
-
+			app.MapRazorPages();
 			app.Run();
 		}
 	}

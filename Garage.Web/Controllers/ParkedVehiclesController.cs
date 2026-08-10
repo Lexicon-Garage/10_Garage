@@ -7,6 +7,9 @@ using Garage.Web.ViewModels.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
+
+[Authorize]
 
 public class ParkedVehiclesController : Controller
 {
