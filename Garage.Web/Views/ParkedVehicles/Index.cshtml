@@ -1,4 +1,4 @@
-@model IEnumerable<Garage.Web.ViewModels.ParkedVehicleOverviewViewModel>
+@model IEnumerable<Garage.Web.ViewModels.ParkingOverviewViewModel>
 @{
     var curCol = ViewData["SortColumn"] as string;
     var curDir = ViewData["SortDir"] as string;
@@ -11,7 +11,7 @@
 }
 
 <div class="text-center mb-4">
-    <h1 class="display-6" >Parked vehicles</h1>
+    <h1 class="display-6">Parked vehicles</h1>
 </div>
 <div class="d-flex justify-content-between mt-4">
     <p>
@@ -20,11 +20,11 @@
     <form asp-action="Index" method="get" class="mb-3">
         <div class="input-group" style="max-width: 400px;">
             <input type="text" name="searchString" value="@ViewData["SearchString"]" class="form-control"
-                   placeholder="Search by registration number"/>
+                   placeholder="Search by registration number" />
             <button type="submit" class="btn btn-outline-primary">Search</button>
         </div>
-        <input type="hidden" name="sortColumn" value="@curCol"/>
-        <input type="hidden" name="sortDir" value="@curDir"/>
+        <input type="hidden" name="sortColumn" value="@curCol" />
+        <input type="hidden" name="sortDir" value="@curDir" />
     </form>
 
 </div>
@@ -48,7 +48,7 @@ else
             <tr>
                 <th>
                     <a asp-action="Index" asp-route-searchString="@ViewData["SearchString"]" asp-route-sortColumn="type"
-                       asp-route-sortDir="@NextDir("type")" >Type@(Arrow("type"))</a>
+                       asp-route-sortDir="@NextDir("type")">Type@(Arrow("type"))</a>
                 </th>
                 <th>
                     <a asp-action="Index" asp-route-searchString="@ViewData["SearchString"]" asp-route-sortColumn="reg"
@@ -66,14 +66,15 @@ else
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@item.VehicleType</td>
+                    <td>@item.VehicleTypeName</td>
                     <td>@item.RegistrationNumber</td>
-                    <td>@item.ArrivedTime.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@item.CheckInTime.ToString("yyyy-MM-dd HH:mm")</td>
                     <td>@item.ParkedDurationDisplay</td>
+                    <td>@string.Join(", ", item.SpotNumbers)</td>
                     <td>
-                        <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">Details</a> |
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="text-decoration-none">Edit</a> |
-                        <a asp-action="CheckOut" asp-route-id="@item.Id" class="text-decoration-none">Check out</a>
+                        <a asp-action="Details" asp-route-id="@item.SessionId" class="text-decoration-none">Details</a> |
+                        <a asp-action="Edit" asp-route-id="@item.VehicleId" class="text-decoration-none">Edit</a> |
+                        <a asp-action="CheckOut" asp-route-id="@item.SessionId" class="text-decoration-none">Check out</a>
                     </td>
                 </tr>
             }

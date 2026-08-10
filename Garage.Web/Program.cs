@@ -1,3 +1,4 @@
+using Garage.Web.Configuration;
 using Garage.Web.Data;
 using Garage.Web.Models;
 using Garage.Web.Services;
@@ -36,17 +37,23 @@ namespace Garage.Web
 				.AddRoles<IdentityRole>()
 				.AddEntityFrameworkStores<AppDbContext>();
 
-
-
+	
 			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
+
+			builder.Services
+    			.AddOptions<PricingOptions>()
+    			.Bind(builder.Configuration.GetSection(PricingOptions.SectionName))
+    			.ValidateDataAnnotations()
+    			.ValidateOnStart();
+
             var app = builder.Build();
 
 			using (var scope = app.Services.CreateScope())
-			{
-				var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-				db.Database.Migrate();
-				//DbInitializer.Seed(db);
-			}
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                db.Database.Migrate();
+                DbInitializer.Seed(db);
+            }
 
 			// Configure the HTTP request pipeline.
 			if (!app.Environment.IsDevelopment())

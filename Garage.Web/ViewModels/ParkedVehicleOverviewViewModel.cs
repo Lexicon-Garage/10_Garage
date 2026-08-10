@@ -1,18 +1,18 @@
-using Garage.Web.Models;
+namespace Garage.Web.ViewModels;
 
-namespace Garage.Web.ViewModels
+public class ParkingOverviewViewModel
 {
-    public class ParkedVehicleOverviewViewModel
-    {
-        public int Id { get; set; }
-        public VehicleType VehicleType { get; set; }
-        public string RegistrationNumber { get; set; } = string.Empty;
-        public DateTime ArrivedTime { get; set; }
-        public TimeSpan ParkedDuration => DateTime.Now - ArrivedTime;
+    public int SessionId { get; set; }
+    public int VehicleId { get; set; }
+    public string RegistrationNumber { get; set; } = string.Empty;
+    public string VehicleTypeName { get; set; } = string.Empty;
+    public DateTime CheckInTime { get; set; }
+    public List<string> SpotNumbers { get; set; } = new();
 
-        public string ParkedDurationDisplay =>
-            ParkedDuration.Days > 0
-                ? $"{ParkedDuration.Days}d {ParkedDuration.Hours}h {ParkedDuration.Minutes}m"
-                : $"{ParkedDuration.Hours}h {ParkedDuration.Minutes}m";
-    }
+    public TimeSpan ParkedDuration => DateTime.Now - CheckInTime;
+
+    public string ParkedDurationDisplay =>
+        ParkedDuration.Days > 0
+            ? $"{ParkedDuration.Days}d {ParkedDuration.Hours}h {ParkedDuration.Minutes}m"
+            : $"{ParkedDuration.Hours}h {ParkedDuration.Minutes}m";
 }
