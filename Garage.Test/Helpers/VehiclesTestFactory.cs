@@ -11,7 +11,7 @@ public class VehiclesTestFactory
     private readonly ControllerTestFixture _fixture;
 
     public VehiclesTestFactory(ControllerTestFixture fixture)
-
+       
     {
         _fixture = fixture;
     }
@@ -27,7 +27,7 @@ public class VehiclesTestFactory
         return new AppDbConext(options);
     }
 
-    public VehiclesController CreateController(AppDbConext context, string userId = "user-1", bool isAdmin = false)
+    public VehiclesController CreateController(AppDbConext context,string userId = "user-1", bool isAdmin = false)
     {
         var controller =
             new VehiclesController(
@@ -43,7 +43,7 @@ public class VehiclesTestFactory
     }
 
     public VehiclesController CreateControllerWithoutUser(AppDbConext context)
-
+        
     {
         var controller =
             new VehiclesController(
@@ -55,7 +55,7 @@ public class VehiclesTestFactory
         return controller;
     }
 
-    public VehicleType CreateVehicleType(int id = 1, string name = "Car")
+    public VehicleType CreateVehicleType(int id = 1,string name = "Car")
     {
         return new VehicleType
         {
@@ -96,7 +96,7 @@ public class VehiclesTestFactory
         };
     }
 
-    public async Task<AppDbConext> CreateContextWithVehicles(params Vehicle[] vehicles)
+    public async Task<AppDbConext> CreateContextWithVehicles( params Vehicle[] vehicles)
     {
         var context = CreateContext();
 

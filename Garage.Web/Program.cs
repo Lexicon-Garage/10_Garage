@@ -54,7 +54,7 @@ namespace Garage.Web
 			app.MapStaticAssets();
 			app.MapControllerRoute(
 				name: "default",
-				pattern: "{controller=ParkedVehicles}/{action=Index}/{id?}")
+				pattern: "{controller=Vehicles}/{action=Index}/{id?}")
 				.WithStaticAssets();
 			app.MapRazorPages();
 			app.Run();

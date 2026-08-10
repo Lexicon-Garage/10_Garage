@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="Garage.Test/Garage.Test.csproj" Id="fdcccdf4-59b9-4cef-ab72-1e0c6a3fbd14" />
   <Project Path="Garage.Web/Garage.Web.csproj" />
 </Solution>

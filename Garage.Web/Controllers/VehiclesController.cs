@@ -110,15 +110,15 @@ public class VehiclesController : Controller
     // GET: Vehicles/Create
     public async Task<IActionResult> Create()
     {
-		var vm = new CreateParkVehicleViewModel
+        var vm = new CreateParkVehicleViewModel
 
-		{
-			VehicleTypes = await _context.VehicleTypes
-				.Select(v => new SelectListItem
-				{
-					Value = v.Id.ToString(),
-					Text = v.Name
-				})
+        {
+            VehicleTypes = await _context.VehicleTypes
+                .Select(v => new SelectListItem
+                {
+                    Value = v.Id.ToString(),
+                    Text = v.Name
+                })
 				.ToListAsync(),
 
 			BrandTypes = await _context.BrandTypes
@@ -127,8 +127,8 @@ public class VehiclesController : Controller
 					Value = v.Id.ToString(),
 					Text = v.Name
 				})
-				.ToListAsync()
-		};
+                .ToListAsync()
+        };
 
         return View(vm);
     }
@@ -236,7 +236,7 @@ public class VehiclesController : Controller
                 Selected = v.Id == vehicle.BrandTypeId
             })
             .ToListAsync(),
-            Color = vehicle.Color,
+			Color = vehicle.Color,
 			NumberOfWheels = vehicle.NumberOfWheels,
 			Model = vehicle.Model,
 			BrandTypeId = vehicle.BrandTypeId,

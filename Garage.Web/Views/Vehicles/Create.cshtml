@@ -20,9 +20,9 @@
                 {
                     if (property.PropertyName == nameof(Model.VehicleTypes) ||
                        property.PropertyName == nameof(Model.BrandTypes))
-                       {
-                        continue;
-                       }
+                        {
+                            continue;
+                        }
 
                         var labelText = property.DisplayName ?? property.PropertyName ?? string.Empty;
 
@@ -50,14 +50,15 @@
                             </label>
 
 
-                        @if (property.PropertyName == nameof(Model.VehicleTypeId))
-                        {
-                            <select asp-for="VehicleTypeId"
-                                    asp-items="Model.VehicleTypes"
-                                    class="form-select">
-                                <option value="">-- Select Vehicle Type --</option>
-                            </select>
-                        }
+                            @* VehicleType dropdown *@
+                            @if (property.PropertyName == nameof(Model.VehicleTypeId))
+                            {
+                                <select asp-for="VehicleTypeId"
+                                        asp-items="Model.VehicleTypes"
+                                        class="form-select">
+                                    <option value="">-- Select Vehicle Type --</option>
+                                </select>
+                            }
                         else if (property.PropertyName == nameof(Model.BrandTypeId))
                         {
                             <select asp-for="BrandTypeId"
