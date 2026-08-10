@@ -5,6 +5,7 @@ using Garage.Web.Services;
 using Garage.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using QuestPDF.Infrastructure;
 
 namespace Garage.Web
@@ -50,10 +51,15 @@ namespace Garage.Web
 
 			using (var scope = app.Services.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                db.Database.Migrate();
-                DbInitializer.Seed(db);
-            }
+				var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+				context.Database.Migrate();
+
+				if (app.Environment.IsDevelopment())
+				{
+					var pricingOptions = scope.ServiceProvider.GetRequiredService<IOptions<PricingOptions>>().Value;
+					DbInitializer.Seed(context, pricingOptions);
+				}
+			}
 
 			// Configure the HTTP request pipeline.
 			if (!app.Environment.IsDevelopment())
@@ -72,7 +78,7 @@ namespace Garage.Web
 
 			app.MapStaticAssets();
 			app.MapControllerRoute(
-				name: "default",
+				name: "default",				
 				pattern: "{controller=ParkedVehicles}/{action=Index}/{id?}")
 				.WithStaticAssets();
 

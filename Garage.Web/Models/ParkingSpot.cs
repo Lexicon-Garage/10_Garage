@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Garage.Web.Models
 {	
-	[Microsoft.EntityFrameworkCore.Index(nameof(SpotNumber), IsUnique = true)]
+	[Index(nameof(SpotNumber), IsUnique = true)]
 	public class ParkingSpot
 	{
 		public int Id { get; set; }

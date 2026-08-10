@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Garage.Web.Models
 {
-	[Microsoft.EntityFrameworkCore.Index(nameof(RegistrationNumber), IsUnique = true)]
+	[Index(nameof(RegistrationNumber), IsUnique = true)]
 	public class Vehicle
 	{
 		public int Id { get; set; }
