@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace Garage.Web.Data
 
 {
-    public class AppDbConext : IdentityDbContext
+    public class AppDbConext : IdentityDbContext<ApplicationUser>
     {
         public AppDbConext(DbContextOptions<AppDbConext> options)
         : base(options)

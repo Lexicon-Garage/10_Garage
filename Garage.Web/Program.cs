@@ -4,6 +4,7 @@ using Garage.Web.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
 using Microsoft.AspNetCore.Identity;
+using Garage.Web.Models;
 
 namespace Garage.Web
 {
@@ -21,7 +22,8 @@ namespace Garage.Web
             options.UseSqlServer(
             builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services
-	            .AddDefaultIdentity<IdentityUser>()
+	            .AddDefaultIdentity<ApplicationUser>()
+	            .AddRoles<IdentityRole>()
 	            .AddEntityFrameworkStores<AppDbConext>();
 			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
             var app = builder.Build();
