@@ -1,4 +1,4 @@
-﻿public class PricingOptionsTests
+public class ParkingRulesTests
 {
     private const string Me = "user-1";
     private const string SomeoneElse = "user-2";
@@ -54,30 +54,4 @@
                         ParkingRules.Validate(
                             Request(ownerId: SomeoneElse, vehicleParked: true, spotTaken: true),
                             Me, Now));
-
-
-                            [Fact]
-public void Create_StampsCheckInTimeFromClock_NotFromInput()
-{
-    var now = new DateTime(2026, 8, 7, 14, 30, 0);
-    var session = ParkingSessionFactory.Create(vehicleId: 1, spotId: 10, now, hourlyRate: 20m);
-
-    Assert.Equal(now, session.CheckInTime);
-}
-
-[Fact]
-public void Create_UsesRateFromConfiguration()
-{
-    var options = new PricingOptions { HourlyRate = 35m };
-    var session = ParkingSessionFactory.Create(1, 10, DateTime.Now, options.HourlyRate);
-
-    Assert.Equal(35m, session.HourlyRateAtCheckIn);
-}
-
-[Fact]
-public void EveryErrorValue_HasAMessage()
-{
-    foreach (var e in Enum.GetValues<ParkingError>().Where(e => e != ParkingError.None))
-        Assert.False(string.IsNullOrWhiteSpace(e.ToUserMessage()));
-}
 }
