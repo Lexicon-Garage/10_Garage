@@ -21,6 +21,8 @@ namespace Garage.Web
             builder.Services.AddDbContext<AppDbConext>(options =>
             options.UseSqlServer(
             builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<AppDbConext>();
             builder.Services
 	            .AddDefaultIdentity<ApplicationUser>()
 	            .AddRoles<IdentityRole>()
