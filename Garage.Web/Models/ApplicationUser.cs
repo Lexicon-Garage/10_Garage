@@ -14,5 +14,5 @@ public class ApplicationUser : IdentityUser
     public string LastName { get; set; } = string.Empty;
 
     [Required]
-    public string PersonalNumber { get; set; } = string.Empty;
+    public string PersonalIdentityNumber { get; set; } = string.Empty;
 }

@@ -89,6 +89,24 @@ namespace Garage.Web.Areas.Identity.Pages.Account
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }
+            
+            [Required]
+            [Display(Name = "Username")]
+            public string UserName { get; set; }
+
+            [Required]
+            [StringLength(50)]
+            [Display(Name = "First name")]
+            public string FirstName { get; set; }
+
+            [Required]
+            [StringLength(50)]
+            [Display(Name = "Last name")]
+            public string LastName { get; set; }
+
+            [Required]
+            [Display(Name = "Personal identity number")]
+            public string PersonalIdentityNumber { get; set; }
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
