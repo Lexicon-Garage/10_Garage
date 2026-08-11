@@ -53,6 +53,13 @@ public class VehiclesControllerCheckOutTests : IClassFixture<ControllerTestFixtu
     public async Task CheckOut_Get_OwnVehicle_ReturnsVehicle()
     {
         await using var context = _factory.CreateContext();
+        context.BrandTypes.AddRange(
+            _factory.CreateBrandType(
+                1,
+                "Volkswagen"),
+            _factory.CreateBrandType(
+                2,
+                "BMW"));
 
         context.VehicleTypes.Add(
             _factory.CreateVehicleType(
@@ -63,7 +70,8 @@ public class VehiclesControllerCheckOutTests : IClassFixture<ControllerTestFixtu
             _factory.CreateVehicle(
                 1,
                 "ABC123",
-                "user-1"));
+                "user-1",
+                brandTypeId: 1));
 
         await context.SaveChangesAsync();
 
@@ -119,6 +127,14 @@ public class VehiclesControllerCheckOutTests : IClassFixture<ControllerTestFixtu
     public async Task CheckOut_Post_ValidVehicle_RemovesVehicleAndCreatesReceipt()
     {
         await using var context = _factory.CreateContext();
+        context.BrandTypes.AddRange(
+            _factory.CreateBrandType(
+                1,
+                "Volkswagen"),
+            _factory.CreateBrandType(
+                2,
+                "BMW"));    
+
 
         context.VehicleTypes.Add(
             _factory.CreateVehicleType(

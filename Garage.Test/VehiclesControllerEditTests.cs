@@ -58,7 +58,13 @@ public class VehiclesControllerEditTests: IClassFixture<ControllerTestFixture>
     {
         await using var context =
             _factory.CreateContext();
-
+        context.BrandTypes.AddRange(
+            _factory.CreateBrandType(
+                1,
+                "Volkswagen"),
+            _factory.CreateBrandType(
+                2,
+                "BMW"));
         context.VehicleTypes.AddRange(
             _factory.CreateVehicleType(
                 1,
@@ -73,7 +79,8 @@ public class VehiclesControllerEditTests: IClassFixture<ControllerTestFixture>
                 1,
                 "ABC123",
                 "user-1",
-                vehicleTypeId: 1));
+                vehicleTypeId: 1,
+                brandTypeId: 1));
 
         await context.SaveChangesAsync();
 
@@ -232,6 +239,13 @@ public class VehiclesControllerEditTests: IClassFixture<ControllerTestFixture>
     {
         await using var context =
             _factory.CreateContext();
+        context.BrandTypes.AddRange(
+            _factory.CreateBrandType(
+                1,
+                "Volkswagen"),
+            _factory.CreateBrandType(
+                2,
+                "BMW"));
 
         context.VehicleTypes.Add(
             _factory.CreateVehicleType());
@@ -245,7 +259,8 @@ public class VehiclesControllerEditTests: IClassFixture<ControllerTestFixture>
             _factory.CreateVehicle(
                 2,
                 "XYZ999",
-                "user-1"));
+                "user-1",
+                brandTypeId: 1));
 
         await context.SaveChangesAsync();
 
