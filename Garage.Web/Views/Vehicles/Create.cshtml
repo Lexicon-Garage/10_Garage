@@ -1,7 +1,7 @@
 @model CreateVehicleViewModel
 
 @{
-    ViewData["Title"] = "Park Vehicle";
+    ViewData["Title"] = "Add Vehicle";
 }
 
 <div class="container mt-4">
@@ -10,7 +10,7 @@
 
             <div class="text-center mb-4">
                 <h1 class="display-6">Vehicle Check-In</h1>
-                <p class="text-muted">Park your Vehicle.</p>
+                <p class="text-muted">Add your Vehicle.</p>
             </div>
 
             <form asp-action="Create" method="post" class="p-4 bg-light rounded border shadow-sm">
@@ -116,7 +116,7 @@
                 }
 
                 <div class="d-flex gap-2 mt-4">
-                    <button type="submit" class="btn btn-success w-100 py-2">Park Vehicle</button>
+                    <button type="submit" class="btn btn-success w-100 py-2">Add Vehicle</button>
                     <a asp-action="Index" class="btn btn-secondary w-100 py-2 text-center">Cancel</a>
                 </div>
             </form>

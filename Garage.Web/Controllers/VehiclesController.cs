@@ -137,10 +137,10 @@ public class VehiclesController : Controller
 	{
 		NormalizeInput(viewModel);
 
-		bool isAlreadyParked = await _context.Vehicles
+		bool isAlreadyExists = await _context.Vehicles
 		.AnyAsync(v => v.RegistrationNumber == viewModel.RegistrationNumber);
 
-		if (isAlreadyParked)
+		if (isAlreadyExists)
 			ModelState.AddModelError("RegistrationNumber", "A vehicle with this registration number is already exists.");
 		await LoadVehicleDropdowns(viewModel);
         var userId = _userManager.GetUserId(User);
@@ -168,7 +168,7 @@ public class VehiclesController : Controller
 
 				_context.Add(vehicle);
 				await _context.SaveChangesAsync();
-				TempData["ValidationMessage"] = "The vehicle has been successfully parked.";
+				TempData["ValidationMessage"] = "The vehicle has been successfully added.";
 
 				return RedirectToAction(nameof(Index));
 			}

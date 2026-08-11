@@ -109,7 +109,7 @@ public class VehiclesControllerCreateTests: IClassFixture<ControllerTestFixture>
             vehicle.OwnerId);
 
         Assert.Equal(
-            "The vehicle has been successfully parked.",
+            "The vehicle has been successfully added.",
             controller.TempData["ValidationMessage"]);
     }
 
