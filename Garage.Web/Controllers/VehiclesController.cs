@@ -383,7 +383,7 @@ public class VehiclesController : Controller
 	}
     private async Task<Vehicle?> GetAuthorizedVehicleAsync(int id)
     {
-        var query = _context.Vehicles.Include(v => v.VehicleType);
+        var query = _context.Vehicles.Include(v => v.VehicleType).Include(v => v.BrandType);
 
         if (User.IsInRole("Admin"))
         {
