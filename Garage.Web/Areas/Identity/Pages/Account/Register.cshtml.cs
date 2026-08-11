@@ -2,6 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
+using Garage.Web.Areas.Identity.Validation;
+using Garage.Web.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,16 +21,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Garage.Web.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
 
 namespace Garage.Web.Areas.Identity.Pages.Account
 {
@@ -98,16 +99,20 @@ namespace Garage.Web.Areas.Identity.Pages.Account
             [Required]
             [StringLength(50)]
             [Display(Name = "First name")]
-            public string FirstName { get; set; }
+            public string FirstName { get; set; } = string.Empty;
+
 
             [Required]
             [StringLength(50)]
             [Display(Name = "Last name")]
-            public string LastName { get; set; }
+            [DifferentFrom(nameof(FirstName),
+            ErrorMessage = "First name and last name cannot be the same.")]
+            public string LastName { get; set; } = string.Empty;
 
             [Required]
-            [Display(Name = "Personal identity number")]
-            public string PersonalNumber { get; set; }
+            [Display(Name = "Personal number")]
+            [SwedishPersonalNumber]
+            public string PersonalNumber { get; set; } = string.Empty;
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
