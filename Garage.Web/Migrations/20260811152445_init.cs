@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Garage.Web.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -188,7 +188,7 @@ namespace Garage.Web.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ParkingSpot",
+                name: "ParkingSpots",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -200,9 +200,9 @@ namespace Garage.Web.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ParkingSpot", x => x.Id);
+                    table.PrimaryKey("PK_ParkingSpots", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ParkingSpot_VehicleTypes_VehicleTypeId",
+                        name: "FK_ParkingSpots_VehicleTypes_VehicleTypeId",
                         column: x => x.VehicleTypeId,
                         principalTable: "VehicleTypes",
                         principalColumn: "Id",
@@ -231,7 +231,7 @@ namespace Garage.Web.Migrations
                         column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Vehicles_BrandTypes_BrandTypeId",
                         column: x => x.BrandTypeId,
@@ -247,7 +247,7 @@ namespace Garage.Web.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ParkingSession",
+                name: "ParkingSessions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -255,22 +255,22 @@ namespace Garage.Web.Migrations
                     VehicleId = table.Column<int>(type: "int", nullable: false),
                     CheckInTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CheckOutTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    HourlyRateAtCheckIn = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: true)
+                    HourlyRateAtCheckIn = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ParkingSession", x => x.Id);
+                    table.PrimaryKey("PK_ParkingSessions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ParkingSession_Vehicles_VehicleId",
+                        name: "FK_ParkingSessions_Vehicles_VehicleId",
                         column: x => x.VehicleId,
                         principalTable: "Vehicles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ParkingAllocation",
+                name: "ParkingAllocations",
                 columns: table => new
                 {
                     ParkingSessionId = table.Column<int>(type: "int", nullable: false),
@@ -278,18 +278,19 @@ namespace Garage.Web.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ParkingAllocation", x => new { x.ParkingSessionId, x.ParkingSpotId });
+                    table.PrimaryKey("PK_ParkingAllocations", x => new { x.ParkingSessionId, x.ParkingSpotId });
                     table.ForeignKey(
-                        name: "FK_ParkingAllocation_ParkingSession_ParkingSessionId",
+                        name: "FK_ParkingAllocations_ParkingSessions_ParkingSessionId",
                         column: x => x.ParkingSessionId,
-                        principalTable: "ParkingSession",
+                        principalTable: "ParkingSessions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ParkingAllocation_ParkingSpot_ParkingSpotId",
+                        name: "FK_ParkingAllocations_ParkingSpots_ParkingSpotId",
                         column: x => x.ParkingSpotId,
-                        principalTable: "ParkingSpot",
-                        principalColumn: "Id");
+                        principalTable: "ParkingSpots",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -344,24 +345,26 @@ namespace Garage.Web.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ParkingAllocation_ParkingSpotId",
-                table: "ParkingAllocation",
+                name: "IX_ParkingAllocations_ParkingSpotId",
+                table: "ParkingAllocations",
                 column: "ParkingSpotId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ParkingSession_VehicleId",
-                table: "ParkingSession",
-                column: "VehicleId");
+                name: "IX_ParkingSessions_VehicleId",
+                table: "ParkingSessions",
+                column: "VehicleId",
+                unique: true,
+                filter: "[CheckOutTime] IS NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ParkingSpot_SpotNumber",
-                table: "ParkingSpot",
+                name: "IX_ParkingSpots_SpotNumber",
+                table: "ParkingSpots",
                 column: "SpotNumber",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ParkingSpot_VehicleTypeId",
-                table: "ParkingSpot",
+                name: "IX_ParkingSpots_VehicleTypeId",
+                table: "ParkingSpots",
                 column: "VehicleTypeId");
 
             migrationBuilder.CreateIndex(
@@ -411,16 +414,16 @@ namespace Garage.Web.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "ParkingAllocation");
+                name: "ParkingAllocations");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "ParkingSession");
+                name: "ParkingSessions");
 
             migrationBuilder.DropTable(
-                name: "ParkingSpot");
+                name: "ParkingSpots");
 
             migrationBuilder.DropTable(
                 name: "Vehicles");

@@ -2,23 +2,20 @@ using Garage.Web.Configuration;
 using Garage.Web.Data;
 using Garage.Web.Models;
 using Garage.Web.Services;
-using Garage.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using QuestPDF.Infrastructure;
-using Garage.Web.Models;
-using Microsoft.AspNetCore.Identity;
 
 namespace Garage.Web
 {
 	public class Program
 	{
-        public static async Task Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+		public static async Task Main(string[] args)
+		{
+			var builder = WebApplication.CreateBuilder(args);
 
-            QuestPDF.Settings.License = LicenseType.Community;
+			QuestPDF.Settings.License = LicenseType.Community;
 
 
 			// Add services to the container.			
@@ -28,7 +25,7 @@ namespace Garage.Web
 			builder.Services.AddDbContext<AppDbContext>(options =>
 			options.UseSqlServer(
 			builder.Configuration.GetConnectionString("DefaultConnection")));
-									
+
 			builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 			{
 				options.SignIn.RequireConfirmedAccount = false;
@@ -40,20 +37,26 @@ namespace Garage.Web
 				.AddRoles<IdentityRole>()
 				.AddEntityFrameworkStores<AppDbContext>();
 
-	
+
 			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
 
 			builder.Services
-    			.AddOptions<PricingOptions>()
-    			.Bind(builder.Configuration.GetSection(PricingOptions.SectionName))
-    			.ValidateDataAnnotations()
-    			.ValidateOnStart();
+				.AddOptions<PricingOptions>()
+				.Bind(builder.Configuration.GetSection(PricingOptions.SectionName))
+				.ValidateDataAnnotations()
+				.ValidateOnStart();
 
-            var app = builder.Build();
+			var app = builder.Build();
 
 			using (var scope = app.Services.CreateScope())
-            {
+			{
 				var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+				
+				if (app.Environment.IsDevelopment())
+				{
+					//If you want to delete the database and start over, uncomment the next line
+					//context.Database.EnsureDeleted();
+				}
 				context.Database.Migrate();
 
 				if (app.Environment.IsDevelopment())
@@ -69,7 +72,7 @@ namespace Garage.Web
 				app.UseExceptionHandler("/Home/Error");
 				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 				app.UseHsts();
-			}			
+			}
 
 			app.UseHttpsRedirection();
 			app.UseRouting();
@@ -80,8 +83,8 @@ namespace Garage.Web
 
 			app.MapStaticAssets();
 			app.MapControllerRoute(
-				name: "default",				
-				pattern: "{controller=ParkedVehicles}/{action=Index}/{id?}")
+				name: "default",
+				pattern: "{controller=Vehicles}/{action=Index}/{id?}")
 				.WithStaticAssets();
 
 			app.MapRazorPages();

@@ -26,27 +26,27 @@ public class FailingDbContextFactory
         _databaseName = Guid.NewGuid().ToString();
     }
 
-    public AppDbConext CreateNormalContext()
+    public AppDbContext CreateNormalContext()
     {
         var options =
-            new DbContextOptionsBuilder<AppDbConext>()
+            new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(_databaseName)
                 .Options;
 
-        return new AppDbConext(options);
+        return new AppDbContext(options);
     }
 
-    public AppDbConext CreateFailingContext()
+    public AppDbContext CreateFailingContext()
     {
         var interceptor =
             new ThrowDbUpdateExceptionInterceptor();
 
         var options =
-            new DbContextOptionsBuilder<AppDbConext>()
+            new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(_databaseName)
                 .AddInterceptors(interceptor)
                 .Options;
 
-        return new AppDbConext(options);
+        return new AppDbContext(options);
     }
 }

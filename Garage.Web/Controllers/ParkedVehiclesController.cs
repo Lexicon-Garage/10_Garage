@@ -53,7 +53,7 @@ namespace Garage.Web.Controllers
 			};
 
 			var sessions = await query
-				.Select(s => new ParkingOverviewViewModel
+				.Select(s => new VehicleOverviewViewModel
 				{
 					SessionId = s.Id,
 					VehicleId = s.VehicleId,
@@ -215,7 +215,7 @@ namespace Garage.Web.Controllers
 			var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == id);
 			if (vehicle == null) return NotFound();
 
-			var viewModel = new ParkedVehicleEditViewModel
+			var viewModel = new VehicleEditViewModel
 			{
 				Id = vehicle.Id,
 				RegistrationNumber = vehicle.RegistrationNumber,
@@ -235,7 +235,7 @@ namespace Garage.Web.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(int? id,
 			[Bind("Id,RegistrationNumber,VehicleTypeId,Color,NumberOfWheels,Model,BrandTypeId")]
-			ParkedVehicleEditViewModel viewModel)
+			VehicleEditViewModel viewModel)
 		{
 			if (id != null && id != viewModel.Id) return NotFound();
 
@@ -369,10 +369,9 @@ namespace Garage.Web.Controllers
 
 			return RedirectToAction("Index", "Receipts");
 		}
-
+				
 		// ---------- helpers ----------
-
-		private async Task PopulateDropdownsAsync(ParkedVehicleEditViewModel viewModel)
+		private async Task PopulateDropdownsAsync(VehicleEditViewModel viewModel)
 		{
 			viewModel.VehicleTypes = await _context.VehicleTypes
 				.OrderBy(t => t.Name)

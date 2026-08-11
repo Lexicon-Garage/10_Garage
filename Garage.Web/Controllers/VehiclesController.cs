@@ -12,10 +12,10 @@ using System.Text.Json;
 [Authorize]
 public class VehiclesController : Controller
 {
-	private readonly AppDbConext _context;
+	private readonly AppDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public VehiclesController(AppDbConext context, UserManager<ApplicationUser> userManager)
+    public VehiclesController(AppDbContext context, UserManager<ApplicationUser> userManager)
 	{
 		_context = context;
         _userManager = userManager;
@@ -65,9 +65,9 @@ public class VehiclesController : Controller
 		var vehicles = await query
 			.Select(v => new VehicleOverviewViewModel
 			{
-				Id = v.Id,
-				VehicleType = v.VehicleType!.Name,
-				RegistrationNumber = v.RegistrationNumber,
+				VehicleId = v.Id,
+				VehicleTypeName = v.VehicleType!.Name,
+				RegistrationNumber = v.RegistrationNumber				
 				//ArrivedTime = v.ArrivedTime
 			})
 			.ToListAsync();

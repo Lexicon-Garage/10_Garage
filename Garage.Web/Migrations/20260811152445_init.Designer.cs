@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Garage.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260810154936_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260811152445_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

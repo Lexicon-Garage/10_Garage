@@ -1,7 +1,6 @@
 ﻿using Garage.Web.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Garage.Web.Data
 {
@@ -18,8 +17,7 @@ namespace Garage.Web.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(builder);   // required — creates the Identity tables
-             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);   // ← here
+            base.OnModelCreating(builder);   // required — creates the Identity tables             
 
             builder.Entity<ParkingSession>()
                 .HasIndex(s => s.VehicleId)

@@ -1,6 +1,6 @@
 namespace Garage.Web.ViewModels;
 
-public class ParkingOverviewViewModel
+public class VehicleOverviewViewModel
 {
     public int SessionId { get; set; }
     public int VehicleId { get; set; }

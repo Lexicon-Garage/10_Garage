@@ -16,18 +16,18 @@ public class VehiclesTestFactory
         _fixture = fixture;
     }
 
-    public AppDbConext CreateContext()
+    public AppDbContext CreateContext()
     {
         var options =
-            new DbContextOptionsBuilder<AppDbConext>()
+            new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(
                     Guid.NewGuid().ToString())
                 .Options;
 
-        return new AppDbConext(options);
+        return new AppDbContext(options);
     }
 
-    public VehiclesController CreateController(AppDbConext context,string userId = "user-1", bool isAdmin = false)
+    public VehiclesController CreateController(AppDbContext context,string userId = "user-1", bool isAdmin = false)
     {
         var controller =
             new VehiclesController(
@@ -42,7 +42,7 @@ public class VehiclesTestFactory
         return controller;
     }
 
-    public VehiclesController CreateControllerWithoutUser(AppDbConext context)
+    public VehiclesController CreateControllerWithoutUser(AppDbContext context)
         
     {
         var controller =
@@ -96,7 +96,7 @@ public class VehiclesTestFactory
         };
     }
 
-    public async Task<AppDbConext> CreateContextWithVehicles( params Vehicle[] vehicles)
+    public async Task<AppDbContext> CreateContextWithVehicles( params Vehicle[] vehicles)
     {
         var context = CreateContext();
 
@@ -112,7 +112,7 @@ public class VehiclesTestFactory
         return context;
     }
 
-    public async Task<AppDbConext> CreateContextWithVehicleTypes(params VehicleType[] vehicleTypes)
+    public async Task<AppDbContext> CreateContextWithVehicleTypes(params VehicleType[] vehicleTypes)
     {
         var context = CreateContext();
 
