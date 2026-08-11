@@ -111,7 +111,6 @@ namespace Garage.Web.Areas.Identity.Pages.Account
 
             [Required]
             [Display(Name = "Personal number")]
-            [SwedishPersonalNumber]
             public string PersonalNumber { get; set; } = string.Empty;
 
             /// <summary>
