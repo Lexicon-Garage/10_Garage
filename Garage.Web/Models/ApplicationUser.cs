@@ -5,8 +5,8 @@ using System.ComponentModel.DataAnnotations;
 namespace Garage.Web.Models
 {
 	[Index(nameof(PersonalNumber), IsUnique = true)]
-	public class ApplicationUser : IdentityUser
-	{
+    public class ApplicationUser:IdentityUser
+    {
 		[Required]
 		[StringLength(50, MinimumLength = 1)]
 		public required string FirstName { get; set; }

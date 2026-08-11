@@ -1,4 +1,4 @@
-@model Garage.Web.ViewModels.ParkedVehicleEditViewModel
+@model Garage.Web.ViewModels.VehicleEditViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -10,8 +10,7 @@
 
             <div class="text-center mb-4">
                 <h1 class="display-6">Edit details</h1>
-                <p class="text-muted">for parked vehicle - number @Html.DisplayFor(model => model.RegistrationNumber)
-                </p>
+                <p class="text-muted">for edited vehicle - number @Html.DisplayFor(model => model.RegistrationNumber) </p>
                 <hr />
             </div>
 
@@ -23,9 +22,7 @@
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <div class="form-group">
                             <label asp-for="VehicleTypeId"></label>
-                            <select asp-for="VehicleTypeId" asp-items="Model.VehicleTypes" class="form-control">
-                                <option value="">-- Choose vehicle type --</option>
-                            </select>
+                            <select asp-for="VehicleTypeId" asp-items="Model.VehicleTypes" class="form-control"></select>
                             <span asp-validation-for="VehicleTypeId" class="text-danger"></span>
                         </div>
                         <div class="form-group">
@@ -40,9 +37,7 @@
                         </div>
                         <div class="form-group">
                             <label asp-for="BrandTypeId"></label>
-                            <select asp-for="BrandTypeId" asp-items="Model.BrandTypes" class="form-control">
-                                <option value="">-- Choose brand --</option>
-                            </select>
+                            <select asp-for="BrandTypeId" asp-items="Model.BrandTypes" class="form-control"></select>
                             <span asp-validation-for="BrandTypeId" class="text-danger"></span>
                         </div>
                         <div class="form-group">
@@ -56,6 +51,15 @@
                             <input asp-for="NumberOfWheels" class="form-control" />
                             <span asp-validation-for="NumberOfWheels" class="text-danger"></span>
                         </div>
+
+                        
+                       
+
+                        <div class="form-group">
+                            <label>Arrived Time</label>
+@*                             <p class="form-control-plaintext">@Model.ArrivedTime</p>
+ *@                        </div>
+                        
                         <div class="d-flex gap-2 mt-4">
                             <a asp-action="Index" class="btn btn-secondary w-100 py-2 text-center">Back to List</a>
                             <button type="submit" class="btn btn-success w-100 py-2">Save details</button>

@@ -7,13 +7,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using QuestPDF.Infrastructure;
+using Garage.Web.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Garage.Web
 {
 	public class Program
 	{
-		public static void Main(string[] args)
-		{
+        public static async Task Main(string[] args)
+        {
             var builder = WebApplication.CreateBuilder(args);
 
             QuestPDF.Settings.License = LicenseType.Community;

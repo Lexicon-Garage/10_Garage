@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Garage.Web.ViewModels
 {
-    public class ParkedVehicleEditViewModel : IVehicleFormModel
-    {
+    public class VehicleEditViewModel : IVehicleFormModel
+	{
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Registration number is required.")]
@@ -13,16 +13,6 @@ namespace Garage.Web.ViewModels
             ErrorMessage = "5–20 letters or digits, no special characters.")]
         [Display(Name = "Registration Number")]
         public required string RegistrationNumber { get; set; }
-
-        [Required(ErrorMessage = "Choose a vehicle type.")]
-        [Range(1, int.MaxValue, ErrorMessage = "Choose a vehicle type.")]
-        [Display(Name = "Vehicle Type")]
-        public int VehicleTypeId { get; set; }
-
-        [Required(ErrorMessage = "Choose a brand.")]
-        [Range(1, int.MaxValue, ErrorMessage = "Choose a brand.")]
-        [Display(Name = "Brand")]
-        public int BrandTypeId { get; set; }
 
         [Required]
         [StringLength(20, MinimumLength = 2)]
@@ -38,7 +28,16 @@ namespace Garage.Web.ViewModels
         [Display(Name = "Model")]
         public required string Model { get; set; }
 
+        [Required]
+        [Display(Name = "Vehicle Type")]
+        public int VehicleTypeId { get; set; }
         public IEnumerable<SelectListItem> VehicleTypes { get; set; } = Enumerable.Empty<SelectListItem>();
+
+        [Required]
+        [Display(Name = "Brand Type")]
+        public int BrandTypeId { get; set; }
         public IEnumerable<SelectListItem> BrandTypes { get; set; } = Enumerable.Empty<SelectListItem>();
+
     }
+
 }

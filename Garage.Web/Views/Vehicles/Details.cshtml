@@ -1,4 +1,4 @@
-@model Garage.Web.ViewModels.ParkedVehicleDetailsViewModel
+@model Garage.Web.ViewModels.VehicleDetailsViewModel
 @{
     ViewData["Title"] = "Details";
 }
@@ -10,7 +10,7 @@
 
             <div class="text-center mb-4">
                 <h1 class="display-6">Details page</h1>
-                <p class="text-muted">For parked vehicle - number @Html.DisplayFor(model => model.RegistrationNumber)
+                <p class="text-muted">For added vehicle - number @Html.DisplayFor(model => model.RegistrationNumber)
                 </p>
                 <hr/>
             </div>
@@ -40,10 +40,10 @@
     </dl>
     <dl>
         <dt class="col-sm-4">
-            @Html.DisplayNameFor(model => model.BrandType)
+            @Html.DisplayNameFor(model => model.Brand)
         </dt>
         <dd class="col-sm-8">
-            @Html.DisplayFor(model => model.BrandType)
+            @Html.DisplayFor(model => model.Brand)
         </dd>
     </dl>
     <dl>
@@ -64,12 +64,12 @@
     </dl>
 
     <dl>
-        <dt class="col-sm-4">
+        @* <dt class="col-sm-4">
             @Html.DisplayNameFor(model => model.ArrivedTime)
         </dt>
         <dd class="col-sm-8">
             @Html.DisplayFor(model => model.ArrivedTime)
-        </dd>
+        </dd> *@
     </dl>
 
     <div class="d-flex gap-2 mt-4">
