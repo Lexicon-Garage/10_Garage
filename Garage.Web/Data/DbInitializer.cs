@@ -8,10 +8,34 @@ namespace Garage.Web.Data
     {
         public static async Task SeedAsync(
             AppDbConext context,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager)
         {
             // Apply pending migrations
             await context.Database.MigrateAsync();
+
+            // -------------------------
+            // Seed role
+            // -------------------------
+
+            const string adminRole = "Admin";
+
+            if (!await roleManager.RoleExistsAsync(adminRole))
+            {
+                var role = new IdentityRole(adminRole);
+
+                var roleResult = await roleManager.CreateAsync(role);
+
+                if (!roleResult.Succeeded)
+                {
+                    var errors = string.Join(
+                        ", ",
+                        roleResult.Errors.Select(e => e.Description));
+
+                    throw new Exception(
+                        $"Failed to create role: {errors}");
+                }
+            }
 
             // -------------------------
             // Seed user
@@ -49,6 +73,21 @@ namespace Garage.Web.Data
 
                     throw new Exception(
                         $"Failed to create seed user: {errors}");
+                }
+
+                // Add user to Admin role
+                var roleResult = await userManager.AddToRoleAsync(
+                    user,
+                    adminRole);
+
+                if (!roleResult.Succeeded)
+                {
+                    var errors = string.Join(
+                        ", ",
+                        roleResult.Errors.Select(e => e.Description));
+
+                    throw new Exception(
+                        $"Failed to assign role: {errors}");
                 }
             }
 

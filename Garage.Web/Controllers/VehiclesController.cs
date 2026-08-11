@@ -110,27 +110,9 @@ public class VehiclesController : Controller
     // GET: Vehicles/Create
     public async Task<IActionResult> Create()
     {
-        var vm = new CreateVehicleViewModel
+       var viewModel = await LoadVehicleDropdowns(new CreateVehicleViewModel());
 
-        {
-            VehicleTypes = await _context.VehicleTypes
-                .Select(v => new SelectListItem
-                {
-                    Value = v.Id.ToString(),
-                    Text = v.Name
-                })
-				.ToListAsync(),
-
-			BrandTypes = await _context.BrandTypes
-				.Select(v => new SelectListItem
-				{
-					Value = v.Id.ToString(),
-					Text = v.Name
-				})
-                .ToListAsync()
-        };
-
-        return View(vm);
+        return View(viewModel);
     }
 
     private void NormalizeInput(IVehicleFormModel viewModel)
@@ -160,7 +142,7 @@ public class VehiclesController : Controller
 
 		if (isAlreadyParked)
 			ModelState.AddModelError("RegistrationNumber", "A vehicle with this registration number is already exists.");
-		
+		await LoadVehicleDropdowns(viewModel);
         var userId = _userManager.GetUserId(User);
         if (userId == null)
         {
@@ -395,5 +377,24 @@ public class VehiclesController : Controller
         return await query.FirstOrDefaultAsync(v =>
             v.Id == id &&
             v.OwnerId == userId);
+    }
+    private async Task<CreateVehicleViewModel> LoadVehicleDropdowns(CreateVehicleViewModel vm)
+    {
+        vm.VehicleTypes = await _context.VehicleTypes
+            .Select(v => new SelectListItem
+            {
+                Value = v.Id.ToString(),
+                Text = v.Name
+            })
+            .ToListAsync();
+
+        vm.BrandTypes = await _context.BrandTypes
+            .Select(v => new SelectListItem
+            {
+                Value = v.Id.ToString(),
+                Text = v.Name
+            })
+            .ToListAsync();
+        return vm;
     }
 }

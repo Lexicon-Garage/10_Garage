@@ -40,8 +40,12 @@ namespace Garage.Web
 
                 var context = services.GetRequiredService<AppDbConext>();
                 var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-                await DbInitializer.SeedAsync(context, userManager);
+                await DbInitializer.SeedAsync(
+                    context,
+                    userManager,
+                    roleManager);
             }
 
             // Configure the HTTP request pipeline.
