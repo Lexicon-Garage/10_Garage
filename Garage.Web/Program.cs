@@ -18,19 +18,20 @@ namespace Garage.Web
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+         
             builder.Services.AddDbContext<AppDbConext>(options =>
-            options.UseSqlServer(
-            builder.Configuration.GetConnectionString("DefaultConnection")));
+             options.UseSqlServer(
+             builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<GarageWebContext>();
-
-            
-            
             builder.Services
-	            .AddDefaultIdentity<ApplicationUser>()
-	            .AddRoles<IdentityRole>()
-	            .AddEntityFrameworkStores<AppDbConext>();
-			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
+                .AddDefaultIdentity<ApplicationUser>(options =>
+                {
+                    options.SignIn.RequireConfirmedAccount = false;
+                })
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<AppDbConext>();
+
+            builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
