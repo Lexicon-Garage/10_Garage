@@ -409,7 +409,7 @@ public class VehiclesControllerIndexTests: IClassFixture<ControllerTestFixture>
 
         Assert.Equal(
             new[] { 1, 2, 3 },
-            model.Select(x => x.SessionId));
+            model.Select(x => x.VehicleId));
     }
 
     [Fact]
