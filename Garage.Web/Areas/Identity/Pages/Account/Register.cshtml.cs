@@ -111,6 +111,8 @@ namespace Garage.Web.Areas.Identity.Pages.Account
 
             [Required]
             [Display(Name = "Personal number")]
+            [SwedishPersonalNumber(
+            ErrorMessage = "Enter a valid Swedish personal number.")]
             public string PersonalNumber { get; set; } = string.Empty;
 
             /// <summary>
@@ -137,15 +139,25 @@ namespace Garage.Web.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                var existingUser = await _userManager.Users.AnyAsync
-                    (u => u.PersonalNumber == Input.PersonalNumber); 
-                
-                if (existingUser)
-                { 
-                    ModelState.AddModelError("Input.PersonalNumber", "This personal number is already registered.");
-                    return Page(); 
-                }
+                var inputPersonalNumber = Input.PersonalNumber.Replace("-", "");
 
+                if (inputPersonalNumber.Length == 12)
+                {
+                    inputPersonalNumber = inputPersonalNumber.Substring(2);
+                }
+                var existingUser = await _userManager.Users
+                    .AnyAsync(u =>
+                        u.PersonalNumber.Replace("-", "").EndsWith(inputPersonalNumber));
+
+                if (existingUser)
+                {
+                    ModelState.AddModelError(
+                        "Input.PersonalNumber",
+                        "This personal number is already registered.");
+
+                    return Page();
+                }
+                
                 var existingEmail = await _userManager.Users
                 .AnyAsync(u => u.Email == Input.Email);
 
