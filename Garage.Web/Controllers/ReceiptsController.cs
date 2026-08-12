@@ -18,7 +18,7 @@ namespace Garage.Web.Controllers
 
             if (json == null)
             {
-                return RedirectToAction("Index", "ParkedVehicles");
+                return RedirectToAction("Index", "Vehicles");
             }
 
             var receiptViewModel = JsonSerializer.Deserialize<ReceiptViewModel>(json);
@@ -31,7 +31,7 @@ namespace Garage.Web.Controllers
 
             if (json == null)
             {
-                return RedirectToAction("Index", "ParkedVehicles");
+                return RedirectToAction("Index", "Vehicles");
             }
 
             var receipt = JsonSerializer.Deserialize<ReceiptViewModel>(json);

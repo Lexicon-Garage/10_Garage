@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Garage.Web.ViewModels
 {
-    public class ParkedVehicleDetailsViewModel
+    public class VehicleDetailsViewModel
     {
         public int Id { get; set; }
 
@@ -13,9 +13,9 @@ namespace Garage.Web.ViewModels
         [Display(Name = "Registration Number")]
         public string RegistrationNumber { get; set; } = string.Empty;
 
-        [EnumDataType(typeof(VehicleType))]
+        
         [Display(Name = "Vehicle Type")]
-        public VehicleType VehicleType { get; set; }
+        public string VehicleType { get; set; } = string.Empty;
 
         [Required]
         [StringLength(20, MinimumLength = 2)]
@@ -31,11 +31,9 @@ namespace Garage.Web.ViewModels
         [Display(Name = "Model")]
         public string? Model { get; set; }
 
-        [EnumDataType(typeof(BrandType))]
+        [StringLength(50, MinimumLength = 1)]
         [Display(Name = "Brand")]
-        public BrandType BrandType { get; set; }
-
-        [Display(Name = "Arrived at")] public DateTime ArrivedTime { get; set; }
+        public string Brand { get; set; } = string.Empty;
 
     }
 

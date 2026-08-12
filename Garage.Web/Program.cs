@@ -1,33 +1,71 @@
+using Garage.Web.Configuration;
 using Garage.Web.Data;
+using Garage.Web.Models;
 using Garage.Web.Services;
-using Garage.Web.ViewModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using QuestPDF.Infrastructure;
 
 namespace Garage.Web
 {
 	public class Program
 	{
-		public static void Main(string[] args)
+		public static async Task Main(string[] args)
 		{
-            var builder = WebApplication.CreateBuilder(args);
+			var builder = WebApplication.CreateBuilder(args);
 
-            QuestPDF.Settings.License = LicenseType.Community;
+			QuestPDF.Settings.License = LicenseType.Community;
 
-            // Add services to the container.
-            builder.Services.AddControllersWithViews();
-            builder.Services.AddDbContext<AppDbConext>(options =>
-            options.UseSqlServer(
-            builder.Configuration.GetConnectionString("DefaultConnection")));
+
+			// Add services to the container.			
+			builder.Services.AddControllersWithViews();
+			builder.Services.AddRazorPages();
+
+			builder.Services.AddDbContext<AppDbContext>(options =>
+			options.UseSqlServer(
+			builder.Configuration.GetConnectionString("DefaultConnection")));
+
+			builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+			{
+				options.SignIn.RequireConfirmedAccount = false;
+				options.Password.RequireDigit = false;
+				options.Password.RequiredLength = 4;
+				options.Password.RequireNonAlphanumeric = false;
+				options.Password.RequireUppercase = false;
+			})
+				.AddRoles<IdentityRole>()
+				.AddEntityFrameworkStores<AppDbContext>();
+
+
 			builder.Services.AddScoped<IFileHandler<Stream, ReceiptViewModel>, PdfFileHandler>();
-            var app = builder.Build();
-			
+
+			builder.Services
+				.AddOptions<PricingOptions>()
+				.Bind(builder.Configuration.GetSection(PricingOptions.SectionName))
+				.ValidateDataAnnotations()
+				.ValidateOnStart();
+
+			var app = builder.Build();
+
 			using (var scope = app.Services.CreateScope())
 			{
-    			var context = scope.ServiceProvider.GetRequiredService<AppDbConext>();
-    			DbInitializer.Seed(context);
+				var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+				
+				if (app.Environment.IsDevelopment())
+				{
+					//If you want to delete the database and start over, uncomment the next line
+					//context.Database.EnsureDeleted();
+				}
+				context.Database.Migrate();
+
+				if (app.Environment.IsDevelopment())
+				{
+					var pricingOptions = scope.ServiceProvider.GetRequiredService<IOptions<PricingOptions>>().Value;
+					DbInitializer.Seed(context, pricingOptions);
+				}
 			}
-			
+
 			// Configure the HTTP request pipeline.
 			if (!app.Environment.IsDevelopment())
 			{
@@ -39,13 +77,17 @@ namespace Garage.Web
 			app.UseHttpsRedirection();
 			app.UseRouting();
 
+			app.UseAuthentication();
 			app.UseAuthorization();
+
 
 			app.MapStaticAssets();
 			app.MapControllerRoute(
 				name: "default",
-				pattern: "{controller=ParkedVehicles}/{action=Index}/{id?}")
+				pattern: "{controller=Vehicles}/{action=Index}/{id?}")
 				.WithStaticAssets();
+
+			app.MapRazorPages();
 
 			app.Run();
 		}
