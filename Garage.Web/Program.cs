@@ -58,9 +58,6 @@ namespace Garage.Web
 					//context.Database.EnsureDeleted();
 				}
 				context.Database.Migrate();
-				IdentitySeeder.SeedRolesAsync(scope.ServiceProvider)
-					.GetAwaiter()
-					.GetResult();
 
 				if (app.Environment.IsDevelopment())
 				{
