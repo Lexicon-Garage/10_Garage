@@ -1,4 +1,5 @@
 using Garage.Web.Configuration;
+using Garage.Web.Constants;
 using Garage.Web.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -9,10 +10,6 @@ namespace Garage.Web.Data
 		// Development-only default password for all seeded accounts.
 		// Must never be used for self-registered accounts (see "Registrera och logga in" AC).
 		private const string DevPassword = "Dev@Password123";
-
-		// Single source of truth for role names - referenced everywhere instead of
-		// repeating the literal strings "Admin"/"Member".
-		private static readonly string[] RoleNames = { "Admin", "Member" };
 
 		private sealed record SeedUserDefinition(
 			string UserName,
@@ -48,15 +45,15 @@ namespace Garage.Web.Data
 		// a brand new 30-day membership, an already-expired one, and a 65+ two-year one.
 		private static readonly List<SeedUserDefinition> Users = new()
 		{
-			new("devuser",   "Dev",     "User",      "19900101-0001", Now,                Now.AddDays(30),  "Member"),
-			new("devuser1",  "Devone",  "Andersson", "19900101-0003", Now.AddDays(-60),    Now.AddDays(-30), "Member"), // expired Pro
-            new("devuser2",  "Devtwo",  "Bergman",   "19900101-0004", Now,                 Now.AddYears(2),  "Member"), // 65+ rule
-            new("devuser3",  "Devthree","Carlsson",  "19900101-0005", Now,                 Now.AddDays(30),  "Member"),
-			new("devuser4",  "Devfour", "Dahlgren",  "19900101-0006", Now.AddDays(-90),    Now.AddDays(-60), "Member"), // expired long ago
-            new("devuser5",  "Devfive", "Ekstrom",   "19900101-0007", Now,                 Now.AddYears(2),  "Member"), // 65+ rule
-            new("devuser6",  "Devsix",  "Forsberg",  "19900101-0008", Now,                 Now.AddDays(30),  "Member"),
-			new("devuser7",  "Devseven","Gustafsson","19900101-0009", Now.AddDays(-25),    Now.AddDays(5),   "Member"), // Pro ending soon
-            new("adminuser", "Admin",   "User",      "19900101-0002", Now,                 Now.AddYears(2),  "Admin"),
+			new("devuser",   "Dev",     "User",      "19900101-0001", Now,                Now.AddDays(30),  RoleNames.Member),
+			new("devuser1",  "Devone",  "Andersson", "19900101-0003", Now.AddDays(-60),   Now.AddDays(-30), RoleNames.Member), // expired Pro
+            new("devuser2",  "Devtwo",  "Bergman",   "19900101-0004", Now,                Now.AddYears(2),  RoleNames.Member), // 65+ rule
+            new("devuser3",  "Devthree","Carlsson",  "19900101-0005", Now,                Now.AddDays(30),  RoleNames.Member),
+			new("devuser4",  "Devfour", "Dahlgren",  "19900101-0006", Now.AddDays(-90),   Now.AddDays(-60), RoleNames.Member), // expired long ago
+            new("devuser5",  "Devfive", "Ekstrom",   "19900101-0007", Now,                Now.AddYears(2),  RoleNames.Member), // 65+ rule
+            new("devuser6",  "Devsix",  "Forsberg",  "19900101-0008", Now,                Now.AddDays(30),  RoleNames.Member),
+			new("devuser7",  "Devseven","Gustafsson","19900101-00０９", Now.AddDays(-25), Now.AddDays(5),   RoleNames.Member), // Pro ending soon
+            new("adminuser", "Admin",   "User",      "199００１０１-０００２", Now,         Now.AddYears(2),  RoleNames.Admin),
 		};
 
 		private static readonly List<SeedVehicleDefinition> Vehicles = new()
@@ -168,7 +165,7 @@ namespace Garage.Web.Data
 		{
 			var existingNames = context.Roles.Select(r => r.Name).ToHashSet();
 
-			foreach (var name in RoleNames)
+			foreach (var name in RoleNames.All)
 			{
 				if (!existingNames.Contains(name))
 				{
