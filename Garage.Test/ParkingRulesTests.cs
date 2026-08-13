@@ -1,3 +1,9 @@
+
+using Garage.Web.Services;
+
+namespace Garage.Test;
+
+
 public class ParkingRulesTests
 {
     private const string Me = "user-1";
@@ -39,11 +45,10 @@ public class ParkingRulesTests
         => Assert.Equal(ParkingError.OwnerUnderage,
                         ParkingRules.Validate(Request(dob: new DateOnly(2010, 1, 1)), Me, Now));
 
-    // Age boundaries — where this kind of check usually breaks
     [Theory]
-    [InlineData(2008, 08, 06, ParkingError.None)]          // turns 18 exactly today
-    [InlineData(2008, 08, 07, ParkingError.OwnerUnderage)] // 18 tomorrow
-    [InlineData(2008, 02, 29, ParkingError.None)]          // leap-year birthday
+    [InlineData(2008, 08, 06, ParkingError.None)]           // turns 18 exactly today
+    [InlineData(2008, 08, 07, ParkingError.OwnerUnderage)]  // 18 tomorrow
+    [InlineData(2008, 02, 29, ParkingError.None)]           // leap-year birthday
     public void AgeBoundaries(int y, int m, int d, ParkingError expected)
         => Assert.Equal(expected,
                         ParkingRules.Validate(Request(dob: new DateOnly(y, m, d)), Me, Now));
@@ -54,4 +59,14 @@ public class ParkingRulesTests
                         ParkingRules.Validate(
                             Request(ownerId: SomeoneElse, vehicleParked: true, spotTaken: true),
                             Me, Now));
+[Theory]
+[InlineData("19900101-0009", true)]
+[InlineData("20101231-1234", true)]
+[InlineData("abc", false)]
+[InlineData("", false)]
+[InlineData("199001", false)]
+[InlineData("19901301-0009", false)]   // month 13
+public void TryGetBirthDate_ParsesOnlyValidDates(string personalNumber, bool expected)
+    => Assert.Equal(expected, ParkingRules.TryGetBirthDate(personalNumber, out _));
+
 }

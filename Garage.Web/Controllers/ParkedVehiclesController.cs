@@ -1,32 +1,41 @@
 using Garage.Web.Configuration;
 using Garage.Web.Data;
 using Garage.Web.Models;
+using Garage.Web.Services;
 using Garage.Web.ViewModels;
 using Garage.Web.ViewModels.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
-
+using Microsoft.AspNetCore.Authorization;
 namespace Garage.Web.Controllers
 {
+	[Authorize]
 	public class ParkedVehiclesController : Controller
 	{
 		private readonly AppDbContext _context;
 		private readonly PricingOptions _pricing;
 
-		public ParkedVehiclesController(AppDbContext context, IOptions<PricingOptions> pricing)
+		private readonly UserManager<ApplicationUser> _userManager;
+
+		public ParkedVehiclesController(AppDbContext context, IOptions<PricingOptions> pricing, UserManager<ApplicationUser> userManager)
 		{
 			_context = context;
 			_pricing = pricing.Value;
+			_userManager = userManager;
 		}
 
 		// GET: ParkedVehicles
 		public async Task<IActionResult> Index(string? searchString, string? sortColumn, string? sortDir)
 		{
+			var userId = _userManager.GetUserId(User);
+
 			var query = _context.ParkingSessions
 				.Where(s => s.CheckOutTime == null)
+				.Where(s => s.Vehicle!.OwnerId == userId)
 				.AsQueryable();
 
 			if (!string.IsNullOrWhiteSpace(searchString))
@@ -53,16 +62,15 @@ namespace Garage.Web.Controllers
 			};
 
 			var sessions = await query
-				.Select(s => new VehicleOverviewViewModel
+				.Select(s => new ParkingOverviewViewModel
 				{
 					SessionId = s.Id,
 					VehicleId = s.VehicleId,
 					RegistrationNumber = s.Vehicle!.RegistrationNumber,
 					VehicleTypeName = s.Vehicle.VehicleType!.Name,
 					CheckInTime = s.CheckInTime,
-					SpotNumbers = s.ParkingAllocations
-						.Select(a => a.ParkingSpot!.SpotNumber)
-						.ToList()
+					HourlyRateAtCheckIn = s.HourlyRateAtCheckIn,        // ← add
+					SpotNumbers = s.ParkingAllocations.Select(a => a.ParkingSpot!.SpotNumber).ToList()
 				})
 				.ToListAsync();
 
@@ -76,14 +84,16 @@ namespace Garage.Web.Controllers
 		// GET: ParkedVehicles/Details/5
 		public async Task<IActionResult> Details(int? id)
 		{
+			var userId = _userManager.GetUserId(User);
+
 			if (id == null) return NotFound();
 
 			var session = await _context.ParkingSessions
 				.Include(s => s.Vehicle)!.ThenInclude(v => v!.VehicleType)
 				.Include(s => s.Vehicle)!.ThenInclude(v => v!.BrandType)
 				.Include(s => s.ParkingAllocations)!.ThenInclude(a => a.ParkingSpot)
-				.FirstOrDefaultAsync(s => s.Id == id);
-
+				.FirstOrDefaultAsync(s => s.Id == id && s.Vehicle!.OwnerId == userId);
+				
 			if (session == null) return NotFound();
 
 			var viewModel = new ParkingDetailsViewModel
@@ -119,55 +129,45 @@ namespace Garage.Web.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(ParkVehicleViewModel viewModel)
 		{
-			if (!ModelState.IsValid)
+			if (!ModelState.IsValid)                       // ← unchanged
 			{
 				await PopulateParkingListsAsync(viewModel);
 				return View(viewModel);
 			}
+
+			var userId = _userManager.GetUserId(User)!;
 
 			var vehicle = await _context.Vehicles
 				.Include(v => v.VehicleType)
+				.Include(v => v.Owner)                     // needed for the age check
 				.FirstOrDefaultAsync(v => v.Id == viewModel.VehicleId);
-
-			if (vehicle == null)
-			{
-				ModelState.AddModelError(string.Empty, "The selected vehicle does not exist.");
-				await PopulateParkingListsAsync(viewModel);
-				return View(viewModel);
-			}
-
-			bool alreadyParked = await _context.ParkingSessions
-				.AnyAsync(s => s.VehicleId == viewModel.VehicleId && s.CheckOutTime == null);
-
-			if (alreadyParked)
-			{
-				ModelState.AddModelError(string.Empty,
-					"This vehicle already has an active parking session.");
-				await PopulateParkingListsAsync(viewModel);
-				return View(viewModel);
-			}
 
 			var spot = await _context.ParkingSpots
 				.FirstOrDefaultAsync(p => p.Id == viewModel.ParkingSpotId);
 
-			if (spot == null || spot.IsOutOfService)
-			{
-				ModelState.AddModelError(string.Empty, "That parking spot is not available.");
-				await PopulateParkingListsAsync(viewModel);
-				return View(viewModel);
-			}
+			if (vehicle is null || spot is null)
+				return await FailAsync(viewModel, "The selected vehicle or parking spot does not exist.");
 
-			bool spotTaken = await _context.ParkingAllocations
-				.AnyAsync(a => a.ParkingSpotId == viewModel.ParkingSpotId
-							&& a.ParkingSession!.CheckOutTime == null);
+			if (!ParkingRules.TryGetBirthDate(vehicle.Owner!.PersonalNumber, out var birthDate))
+				return await FailAsync(viewModel, "The owner's personal number is invalid.");
 
-			if (spotTaken)
-			{
-				ModelState.AddModelError(string.Empty,
-					"That parking spot was just taken. Please choose another.");
-				await PopulateParkingListsAsync(viewModel);
-				return View(viewModel);
-			}
+			var request = new ParkingRequest(
+				VehicleId: vehicle.Id,
+				VehicleOwnerId: vehicle.OwnerId,
+				OwnerDateOfBirth: birthDate,
+				VehicleHasActiveSession: await _context.ParkingSessions
+					.AnyAsync(s => s.VehicleId == vehicle.Id && s.CheckOutTime == null),
+				SpotId: spot.Id,
+				SpotIsOutOfService: spot.IsOutOfService,
+				SpotHasActiveSession: await _context.ParkingAllocations
+					.AnyAsync(a => a.ParkingSpotId == spot.Id
+								&& a.ParkingSession!.CheckOutTime == null));
+
+
+			var error = ParkingRules.Validate(request, userId, DateTime.Now);
+
+			if (error != ParkingError.None)
+				return await FailAsync(viewModel, error.ToUserMessage());
 
 			await using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -190,7 +190,7 @@ namespace Garage.Web.Controllers
 				});
 
 				await _context.SaveChangesAsync();
-				await transaction.CommitAsync();
+				await transaction.CommitAsync(); 
 
 				TempData["ValidationMessage"] =
 					$"{vehicle.RegistrationNumber} is now parked at spot {spot.SpotNumber}.";
@@ -200,102 +200,24 @@ namespace Garage.Web.Controllers
 			catch (DbUpdateException)
 			{
 				await transaction.RollbackAsync();
-				ModelState.AddModelError(string.Empty,
-					"The vehicle could not be parked. Please try again.");
-				await PopulateParkingListsAsync(viewModel);
-				return View(viewModel);
+				return await FailAsync(viewModel, "The vehicle could not be parked. Please try again.");
 			}
 		}
-
-		// GET: ParkedVehicles/Edit/5
-		public async Task<IActionResult> Edit(int? id)
-		{
-			if (id == null) return NotFound();
-
-			var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == id);
-			if (vehicle == null) return NotFound();
-
-			var viewModel = new VehicleEditViewModel
-			{
-				Id = vehicle.Id,
-				RegistrationNumber = vehicle.RegistrationNumber,
-				VehicleTypeId = vehicle.VehicleTypeId,
-				BrandTypeId = vehicle.BrandTypeId,
-				Color = vehicle.Color,
-				NumberOfWheels = vehicle.NumberOfWheels,
-				Model = vehicle.Model
-			};
-
-			await PopulateDropdownsAsync(viewModel);
-			return View(viewModel);
-		}
-
-		// POST: ParkedVehicles/Edit/5
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(int? id,
-			[Bind("Id,RegistrationNumber,VehicleTypeId,Color,NumberOfWheels,Model,BrandTypeId")]
-			VehicleEditViewModel viewModel)
-		{
-			if (id != null && id != viewModel.Id) return NotFound();
-
-			if (!ModelState.IsValid)
-			{
-				await PopulateDropdownsAsync(viewModel);
-				return View(viewModel);
-			}
-
-			NormalizeInput(viewModel);
-
-			var vehicle = await _context.Vehicles.FindAsync(viewModel.Id);
-			if (vehicle == null) return NotFound();
-
-			var reg = viewModel.RegistrationNumber;
-
-			bool exists = await _context.Vehicles
-				.AnyAsync(v => v.RegistrationNumber == reg && v.Id != viewModel.Id);
-
-			if (exists)
-			{
-				ModelState.AddModelError(nameof(viewModel.RegistrationNumber),
-					$"A vehicle with registration number {reg} is already registered.");
-				await PopulateDropdownsAsync(viewModel);
-				return View(viewModel);
-			}
-
-			try
-			{
-				vehicle.RegistrationNumber = reg;
-				vehicle.VehicleTypeId = viewModel.VehicleTypeId;
-				vehicle.BrandTypeId = viewModel.BrandTypeId;
-				vehicle.Color = viewModel.Color;
-				vehicle.NumberOfWheels = viewModel.NumberOfWheels;
-				vehicle.Model = viewModel.Model;
-				// OwnerId is never bound or assigned from the form
-
-				await _context.SaveChangesAsync();
-				TempData["ValidationMessage"] = "The vehicle has been updated successfully.";
-			}
-			catch (DbUpdateException)
-			{
-				TempData["ValidationMessage"] =
-					"Could not update the vehicle data. Please try again.";
-			}
-
-			return RedirectToAction(nameof(Index));
-		}
-
+		
 		// GET: ParkedVehicles/CheckOut/5
 		[HttpGet]
 		public async Task<IActionResult> CheckOut(int? id)
 		{
 			if (id == null) return NotFound();
 
-			var session = await _context.ParkingSessions
+			var userId = _userManager.GetUserId(User)!;
+
+			  var session = await _context.ParkingSessions
 				.Include(s => s.Vehicle)!.ThenInclude(v => v!.VehicleType)
-				.Include(s => s.Vehicle)!.ThenInclude(v => v!.BrandType)
 				.Include(s => s.ParkingAllocations)!.ThenInclude(a => a.ParkingSpot)
-				.FirstOrDefaultAsync(s => s.Id == id && s.CheckOutTime == null);
+				.FirstOrDefaultAsync(s => s.Id == id
+									&& s.CheckOutTime == null
+                               		&& s.Vehicle!.OwnerId == userId);
 
 			if (session == null) return NotFound();
 
@@ -321,10 +243,14 @@ namespace Garage.Web.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> CheckOut(int id)
 		{
-			var session = await _context.ParkingSessions
+			var userId = _userManager.GetUserId(User)!;
+
+			  var session = await _context.ParkingSessions
 				.Include(s => s.Vehicle)!.ThenInclude(v => v!.VehicleType)
 				.Include(s => s.ParkingAllocations)!.ThenInclude(a => a.ParkingSpot)
-				.FirstOrDefaultAsync(s => s.Id == id && s.CheckOutTime == null);
+				.FirstOrDefaultAsync(s => s.Id == id
+									&& s.CheckOutTime == null
+                               		&& s.Vehicle!.OwnerId == userId);
 
 			if (session == null)
 			{
@@ -369,24 +295,13 @@ namespace Garage.Web.Controllers
 
 			return RedirectToAction("Index", "Receipts");
 		}
-				
-		// ---------- helpers ----------
-		private async Task PopulateDropdownsAsync(VehicleEditViewModel viewModel)
-		{
-			viewModel.VehicleTypes = await _context.VehicleTypes
-				.OrderBy(t => t.Name)
-				.Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name })
-				.ToListAsync();
-
-			viewModel.BrandTypes = await _context.BrandTypes
-				.OrderBy(b => b.Name)
-				.Select(b => new SelectListItem { Value = b.Id.ToString(), Text = b.Name })
-				.ToListAsync();
-		}
 
 		private async Task PopulateParkingListsAsync(ParkVehicleViewModel viewModel)
 		{
+			var userId = _userManager.GetUserId(User);
+
 			viewModel.Vehicles = await _context.Vehicles
+				.Where(v => v.OwnerId == userId)
 				.Where(v => !v.ParkingSessions.Any(s => s.CheckOutTime == null))
 				.OrderBy(v => v.RegistrationNumber)
 				.Select(v => new SelectListItem
@@ -422,6 +337,12 @@ namespace Garage.Web.Controllers
 			viewModel.RegistrationNumber = viewModel.RegistrationNumber.Trim().ToUpper();
 			viewModel.Color = viewModel.Color.Trim();
 			viewModel.Model = viewModel.Model.Trim();
+		}
+		private async Task<IActionResult> FailAsync(ParkVehicleViewModel viewModel, string message)
+		{
+			ModelState.AddModelError(string.Empty, message);
+			await PopulateParkingListsAsync(viewModel);
+			return View(viewModel);
 		}
 	}
 }

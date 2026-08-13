@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Garage.Web.Services;
 
 public static class ParkingRules
@@ -22,4 +24,16 @@ public static class ParkingRules
         if (today < birthDate.AddYears(age)) age--;
         return age;
     }
+    public static bool TryGetBirthDate(string personalNumber, out DateOnly birthDate)
+{
+    birthDate = default;
+
+    // Expected format: ÅÅÅÅMMDD-XXXX
+    if (string.IsNullOrWhiteSpace(personalNumber) || personalNumber.Length < 8)
+        return false;
+
+    return DateOnly.TryParseExact(
+        personalNumber[..8], "yyyyMMdd",
+        CultureInfo.InvariantCulture, DateTimeStyles.None, out birthDate);
+}
 }
