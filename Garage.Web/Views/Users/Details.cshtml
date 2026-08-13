@@ -1,0 +1,63 @@
+@model Garage.Web.ViewModels.UserDetailsViewModel
+@using Garage.Web.Constants
+
+@{
+    ViewData["Title"] = "User details";
+}
+
+<h1>User details</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<dl class="row">
+    <dt class="col-sm-2">Name</dt>
+    <dd class="col-sm-10">@Model.FirstName @Model.LastName</dd>
+
+    <dt class="col-sm-2">Username</dt>
+    <dd class="col-sm-10">@Model.UserName</dd>
+
+    <dt class="col-sm-2">Email</dt>
+    <dd class="col-sm-10">@Model.Email</dd>
+</dl>
+
+<h2>Roles</h2>
+
+<form asp-action="UpdateRoles" asp-route-id="@Model.UserId" method="post">
+    @foreach (var role in Model.AvailableRoles)
+    {
+        var isChecked = Model.CurrentRoles.Contains(role);
+        var isLockedAdminRole = Model.IsCurrentUser && role == RoleNames.Admin;
+
+        <div class="form-check">
+            @if (isLockedAdminRole)
+            {
+                @* Disabled checkboxes are never posted - this hidden field guarantees
+                   "Admin" is still submitted, so self-editing never accidentally
+                   triggers the "can't remove your own Admin role" block for
+                   unrelated role changes. *@
+                <input type="hidden" name="selectedRoles" value="@role" />
+            }
+            <input class="form-check-input" type="checkbox" name="selectedRoles"
+                   value="@role" id="role-@role" checked="@isChecked"
+                   disabled="@isLockedAdminRole" />
+            <label class="form-check-label" for="role-@role">
+                @role
+                @if (isLockedAdminRole)
+                {
+                    <span class="text-muted small">(you can't remove your own Admin role)</span>
+                }
+            </label>
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary mt-3">Update roles</button>
+</form>
+
+<a asp-action="Index" class="btn btn-secondary mt-3">Back to list</a>

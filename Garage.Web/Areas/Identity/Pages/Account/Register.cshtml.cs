@@ -21,6 +21,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using Garage.Web.Constants;
 
 namespace Garage.Web.Areas.Identity.Pages.Account
 {
@@ -171,9 +172,22 @@ namespace Garage.Web.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
+                    var roleResult = await _userManager.AddToRoleAsync(user, RoleNames.Member);
+					if (!roleResult.Succeeded)
+					{						
+						await _userManager.DeleteAsync(user);
 
-                    var userId = await _userManager.GetUserIdAsync(user);
+						foreach (var error in roleResult.Errors)
+                            ModelState.AddModelError(string.Empty, error.Description);
+						
+                        return Page();
+					}
+
+					_logger.LogInformation("User created a new account with password.");
+					
+
+
+					var userId = await _userManager.GetUserIdAsync(user);
                     //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     //var callbackUrl = Url.Page(
