@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using Garage.Web.Models
+@using Garage.Web.Constants
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -28,10 +35,21 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Vehicles" asp-action="Create">Add Vehicle</a>
                         </li>
-                        @if (User.Identity?.IsAuthenticated ?? false)
+                     @if (SignInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="ParkedVehicles" asp-action="Index">Parked Vehicles</a>
+                            </li>
+
+                            @if (User.IsInRole(RoleNames.Admin))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Users" asp-action="Index">Users</a>
+                                </li>
+                            }
+
+                            <li class="nav-item">
+                                <span class="nav-link text-dark">Hello, @User.Identity!.Name!</span>
                             </li>
                         }
                         <partial name="_LoginPartial" />
