@@ -1,0 +1,83 @@
+﻿@model Garage.Web.Models.VehicleType
+
+@{
+    ViewData["Title"] = "Ta bort fordonstyp";
+}
+
+<div class="container mt-4">
+
+    <h1>Ta bort fordonstyp</h1>
+
+    <hr />
+
+    @if (Model.Vehicles.Any() || Model.ParkingSpots.Any())
+    {
+        <div class="alert alert-danger">
+
+            <h5>Fordonstypen kan inte tas bort</h5>
+
+            <p>
+                Den här fordonstypen används fortfarande i systemet.
+            </p>
+
+            @if (Model.Vehicles.Any())
+            {
+                <p>
+                    Antal fordon:
+                    <strong>@Model.Vehicles.Count</strong>
+                </p>
+            }
+
+            @if (Model.ParkingSpots.Any())
+            {
+                <p>
+                    Antal parkeringsplatser:
+                    <strong>@Model.ParkingSpots.Count</strong>
+                </p>
+            }
+
+            <a asp-area="Admin"
+               asp-controller="VehicleTypes"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Tillbaka
+            </a>
+
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+
+            Är du säker på att du vill ta bort
+            <strong>@Model.Name</strong>?
+
+        </div>
+
+        <form asp-area="Admin"
+              asp-controller="VehicleTypes"
+              asp-action="Delete"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="id"
+                   value="@Model.Id" />
+
+            <button type="submit"
+                    class="btn btn-danger">
+                Ja, ta bort
+            </button>
+
+            <a asp-area="Admin"
+               asp-controller="VehicleTypes"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Avbryt
+            </a>
+
+        </form>
+    }
+
+</div>

@@ -1,0 +1,91 @@
+﻿@model Garage.Web.Models.ParkingSpot
+
+@{
+    ViewData["Title"] = "Visa parkeringsplats";
+
+    var isOccupied = Model.ParkingAllocations
+        .Any(a => a.ParkingSession != null &&
+                  a.ParkingSession.CheckOutTime == null);
+}
+
+<div class="container mt-4">
+
+    <h1>Parkeringsplats</h1>
+
+    <hr />
+
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            Platsnummer
+        </dt>
+
+        <dd class="col-sm-9">
+            @Model.SpotNumber
+        </dd>
+
+        <dt class="col-sm-3">
+            Location
+        </dt>
+
+        <dd class="col-sm-9">
+            @Model.Location
+        </dd>
+
+        <dt class="col-sm-3">
+            Fordonstyp
+        </dt>
+
+        <dd class="col-sm-9">
+            @Model.VehicleType?.Name
+        </dd>
+
+        <dt class="col-sm-3">
+            Status
+        </dt>
+
+        <dd class="col-sm-9">
+
+            @if (Model.IsOutOfService)
+            {
+                <span class="badge bg-danger">
+                    Ur funktion
+                </span>
+            }
+            else if (isOccupied)
+            {
+                <span class="badge bg-warning text-dark">
+                    Upptagen
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-success">
+                    Ledig
+                </span>
+            }
+
+        </dd>
+
+    </dl>
+
+    <div class="mt-3">
+
+        <a asp-area="Admin"
+           asp-controller="ParkingSpots"
+           asp-action="Edit"
+           asp-route-id="@Model.Id"
+           class="btn btn-warning">
+            Redigera
+        </a>
+
+        <a asp-area="Admin"
+           asp-controller="ParkingSpots"
+           asp-action="Index"
+           class="btn btn-secondary">
+            Tillbaka
+        </a>
+
+    </div>
+
+</div>

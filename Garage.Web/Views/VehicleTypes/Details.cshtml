@@ -1,0 +1,60 @@
+﻿@model Garage.Web.Models.VehicleType
+
+@{
+    ViewData["Title"] = "Visa fordonstyp";
+}
+
+<div class="container mt-4">
+
+    <h1>Fordonstyp</h1>
+
+    <hr />
+
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            Namn
+        </dt>
+
+        <dd class="col-sm-9">
+            @Model.Name
+        </dd>
+
+        <dt class="col-sm-3">
+            Antal fordon
+        </dt>
+
+        <dd class="col-sm-9">
+            @Model.Vehicles.Count
+        </dd>
+
+        <dt class="col-sm-3">
+            Antal parkeringsplatser
+        </dt>
+
+        <dd class="col-sm-9">
+            @Model.ParkingSpots.Count
+        </dd>
+
+    </dl>
+
+    <div class="mt-3">
+
+        <a asp-area="Admin"
+           asp-controller="VehicleTypes"
+           asp-action="Edit"
+           asp-route-id="@Model.Id"
+           class="btn btn-warning">
+            Redigera
+        </a>
+
+        <a asp-area="Admin"
+           asp-controller="VehicleTypes"
+           asp-action="Index"
+           class="btn btn-secondary">
+            Tillbaka
+        </a>
+
+    </div>
+
+</div>

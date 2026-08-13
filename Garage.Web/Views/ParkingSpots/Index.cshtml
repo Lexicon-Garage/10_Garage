@@ -1,0 +1,134 @@
+﻿@model IEnumerable<Garage.Web.ViewModels.Admin.ParkingSpotListViewModel>
+
+@{
+    ViewData["Title"] = "Parkeringsplatser";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h1>Parkeringsplatser</h1>
+
+        <a asp-area="Admin"
+           asp-controller="ParkingSpots"
+           asp-action="Create"
+           class="btn btn-primary">
+            <i class="bi bi-plus"></i>
+            Skapa parkeringsplats
+        </a>
+
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            Det finns inga parkeringsplatser ännu.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped table-hover">
+
+            <thead>
+                <tr>
+                    <th>Platsnummer</th>
+                    <th>Location</th>
+                    <th>Fordonstyp</th>
+                    <th>Status</th>
+                    <th class="text-end">Åtgärder</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td>
+                            <strong>@item.SpotNumber</strong>
+                        </td>
+
+                        <td>
+                            @item.Location
+                        </td>
+
+                        <td>
+                            @item.VehicleTypeName
+                        </td>
+
+                        <td>
+
+                            @if (item.IsOutOfService)
+                            {
+                                <span class="badge bg-danger">
+                                    Ur funktion
+                                </span>
+                            }
+                            else if (item.IsOccupied)
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    Upptagen
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">
+                                    Ledig
+                                </span>
+                            }
+
+                        </td>
+
+                        <td class="text-end">
+
+                            <a asp-area="Admin"
+                               asp-controller="ParkingSpots"
+                               asp-action="Details"
+                               asp-route-id="@item.Id"
+                               class="btn btn-sm btn-info">
+                                Visa
+                            </a>
+
+                            <a asp-area="Admin"
+                               asp-controller="ParkingSpots"
+                               asp-action="Edit"
+                               asp-route-id="@item.Id"
+                               class="btn btn-sm btn-warning">
+                                Redigera
+                            </a>
+
+                            <a asp-area="Admin"
+                               asp-controller="ParkingSpots"
+                               asp-action="Delete"
+                               asp-route-id="@item.Id"
+                               class="btn btn-sm btn-danger">
+                                Ta bort
+                            </a>
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+    }
+
+</div>

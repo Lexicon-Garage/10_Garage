@@ -1,0 +1,137 @@
+﻿@model Garage.Web.ViewModels.Admin.ParkingSpotEditViewModel
+
+@{
+    ViewData["Title"] = "Redigera parkeringsplats";
+}
+
+<div class="container mt-4">
+
+    <h1>Redigera parkeringsplats</h1>
+
+    <hr />
+
+    <div class="row">
+
+        <div class="col-md-6">
+
+            <form asp-area="Admin"
+                  asp-controller="ParkingSpots"
+                  asp-action="Edit"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       asp-for="Id" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3">
+                </div>
+
+                <!-- Spot Number -->
+
+                <div class="mb-3">
+
+                    <label asp-for="SpotNumber"
+                           class="form-label">
+                        Platsnummer
+                    </label>
+
+                    <input asp-for="SpotNumber"
+                           class="form-control" />
+
+                    <span asp-validation-for="SpotNumber"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                <!-- Location -->
+
+                <div class="mb-3">
+
+                    <label asp-for="Location"
+                           class="form-label">
+                        Location
+                    </label>
+
+                    <input asp-for="Location"
+                           class="form-control" />
+
+                    <span asp-validation-for="Location"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                <!-- Vehicle Type -->
+
+                <div class="mb-3">
+
+                    <label asp-for="VehicleTypeId" class="form-label">
+                        Fordonstyp
+                    </label>
+
+                    <select asp-for="VehicleTypeId"
+                            asp-items="ViewBag.VehicleTypes"
+                            class="form-select">
+                        <option value="">-- Välj fordonstyp --</option>
+                    </select>
+
+                    <span asp-validation-for="VehicleTypeId"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                <!-- Out of Service -->
+
+                <div class="form-check mb-3">
+
+                    <input asp-for="IsOutOfService"
+                           class="form-check-input" />
+
+                    <label asp-for="IsOutOfService"
+                           class="form-check-label">
+                        Ur funktion
+                    </label>
+
+                </div>
+
+                <!-- Occupied is intentionally NOT here -->
+
+                <div class="alert alert-info">
+                    <strong>Observera:</strong>
+                    Upptagen-status beräknas automatiskt från aktiva
+                    parkeringar och kan inte ändras manuellt.
+                </div>
+
+                <div class="mt-3">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Spara ändringar
+                    </button>
+
+                    <a asp-area="Admin"
+                       asp-controller="ParkingSpots"
+                       asp-action="Index"
+                       class="btn btn-secondary">
+                        Avbryt
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
