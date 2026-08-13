@@ -1,0 +1,98 @@
+﻿@model Garage.Web.Models.ParkingSpot
+
+@{
+    ViewData["Title"] = "Ta bort parkeringsplats";
+}
+
+<div class="container mt-4">
+
+    <h1>Ta bort parkeringsplats</h1>
+
+    <hr />
+
+    @if (Model.ParkingAllocations.Any())
+    {
+        <div class="alert alert-danger">
+
+            <h5>Parkeringsplatsen kan inte tas bort</h5>
+
+            <p>
+                Parkeringsplatsen används av en eller flera
+                parkeringar och kan därför inte tas bort.
+            </p>
+
+            <p>
+                Antal registrerade parkeringar:
+                <strong>
+                    @Model.ParkingAllocations.Count
+                </strong>
+            </p>
+
+            <a asp-area="Admin"
+               asp-controller="ParkingSpots"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Tillbaka
+            </a>
+
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+
+            <p>
+                Är du säker på att du vill ta bort
+                parkeringsplatsen
+                <strong>@Model.SpotNumber</strong>?
+            </p>
+
+            <dl class="row mb-0">
+
+                <dt class="col-sm-3">
+                    Location
+                </dt>
+
+                <dd class="col-sm-9">
+                    @Model.Location
+                </dd>
+
+                <dt class="col-sm-3">
+                    Fordonstyp
+                </dt>
+
+                <dd class="col-sm-9">
+                    @Model.VehicleType?.Name
+                </dd>
+
+            </dl>
+
+        </div>
+
+        <form asp-area="Admin"
+              asp-controller="ParkingSpots"
+              asp-action="Delete"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="id"
+                   value="@Model.Id" />
+
+            <button type="submit"
+                    class="btn btn-danger">
+                Ja, ta bort
+            </button>
+
+            <a asp-area="Admin"
+               asp-controller="ParkingSpots"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Avbryt
+            </a>
+
+        </form>
+    }
+
+</div>
