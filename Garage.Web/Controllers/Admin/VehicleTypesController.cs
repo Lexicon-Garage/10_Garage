@@ -1,8 +1,10 @@
 ﻿using Garage.Web.Data;
 using Garage.Web.Models;
 using Garage.Web.ViewModels.Admin;
+using Garage.Web.Data;
+using Garage.Web.Models;
+using Garage.Web.ViewModels.Admin;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
