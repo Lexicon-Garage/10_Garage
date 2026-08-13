@@ -141,6 +141,18 @@
                                 <ul class="dropdown-menu"
                                     aria-labelledby="adminDropdown">
 
+                                    <!-- Active Parkings -->
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-area="Admin"
+                                           asp-controller="ParkingSessions"
+                                           asp-action="Index">
+
+                                            Active Parkings
+
+                                        </a>
+                                    </li>
 
                                     <!-- PARKING SPOTS -->
 
@@ -161,7 +173,7 @@
                                     <li>
 
                                         <a class="dropdown-item"
-                                           asp-area="Admin"
+                                           
                                            asp-controller="ParkingSpots"
                                            asp-action="Create">
 
