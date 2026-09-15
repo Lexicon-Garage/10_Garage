@@ -59,10 +59,11 @@ namespace Garage.Web
 				}
 				context.Database.Migrate();
 
-				if (app.Environment.IsDevelopment())
+				if (app.Configuration.GetValue<bool>("SeedData"))
 				{
-					var pricingOptions = scope.ServiceProvider.GetRequiredService<IOptions<PricingOptions>>().Value;
-					DbInitializer.Seed(context, pricingOptions);
+    				var pricingOptions = scope.ServiceProvider.GetRequiredService<IOptions<PricingOptions>>().Value;
+    				var seedPassword = app.Configuration["SeedPassword"] ?? "Dev@Password123";
+    				DbInitializer.Seed(context, pricingOptions, seedPassword);
 				}
 			}
 
