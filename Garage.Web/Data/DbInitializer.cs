@@ -88,18 +88,23 @@ namespace Garage.Web.Data
 			new("YZA567", TimeSpan.FromDays(7) + TimeSpan.FromHours(6), TimeSpan.FromHours(3), Array.Empty<string>()),
 		};
 
-		public static void Seed(AppDbContext context, PricingOptions pricingOptions)
+		public static void Seed(AppDbContext context, PricingOptions pricingOptions, string? seedPassword = null)
 		{
+
+			var password = seedPassword ?? DevPassword;
+
 			SeedVehicleTypes(context);
 			SeedBrandTypes(context);
+			var users = SeedUsers(context, password);
 			SeedParkingSpots(context);
 			SeedRoles(context);
 
-			var users = SeedUsers(context);
 			SeedUserRoles(context, users);
 
 			SeedVehicles(context, users);
 			SeedParkingSessions(context, pricingOptions);
+
+			
 		}
 
 		private static void SeedVehicleTypes(AppDbContext context)
@@ -181,7 +186,7 @@ namespace Garage.Web.Data
 			context.SaveChanges();
 		}
 
-		private static Dictionary<string, ApplicationUser> SeedUsers(AppDbContext context)
+		private static Dictionary<string, ApplicationUser> SeedUsers(AppDbContext context, string seedPassword)
 		{
 			var wantedNames = Users.Select(def => def.UserName).ToList();
 
@@ -212,7 +217,7 @@ namespace Garage.Web.Data
 					SecurityStamp = Guid.NewGuid().ToString("D")
 				};
 
-				user.PasswordHash = hasher.HashPassword(user, DevPassword);
+				user.PasswordHash = hasher.HashPassword(user, seedPassword);
 				toAdd.Add(user);
 			}
 
